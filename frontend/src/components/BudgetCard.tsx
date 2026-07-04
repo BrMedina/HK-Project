@@ -44,8 +44,9 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
   const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const progress = safePercent / 100;
-  const endAngle = -90 + progress * 360;
-  const arcPath = describeArc(size / 2, size / 2, radius, -90, endAngle);
+  const startAngle = 0;
+  const endAngle = Math.min(progress, 0.9999) * 360;
+  const arcPath = describeArc(size / 2, size / 2, radius, startAngle, endAngle);
 
   return (
     <View style={styles.budgetCard}>
