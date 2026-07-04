@@ -27,31 +27,41 @@ async function loadWidgetData(activeTrip) {
 }
 
 export async function widgetTaskHandler(props) {
-  const activeTrip = await getActiveTrip();
-  const { todaySpentPHP, totalSpentPHP, rate, budgetHkd } = await loadWidgetData(activeTrip);
-  
-  // Calculate remaining budget in HKD
-  // If activeTrip.currency_preference === 'PHP', does budget left mean HKD or PHP?
-  // The widget says `HK$${budgetLeftHKD} left`, so it expects HKD.
-  const budgetLeftHKD = activeTrip ? Math.max(0, budgetHkd - (totalSpentPHP / rate)) : 0;
+  let todaySpentPHP = 0;
+  let budgetLeftHKD = 0;
 
-  switch (props.widgetAction) {
-    case "WIDGET_ADDED":
-    case "WIDGET_UPDATE":
-    case "WIDGET_RESIZED":
-      props.renderWidget(
-        <QuickAddWidget totalSpentPHP={todaySpentPHP} budgetLeftHKD={budgetLeftHKD} />
-      );
-      break;
+  try {
+    const activeTrip = await getActiveTrip();
+    if (activeTrip) {
+      const { todaySpentPHP: today, totalSpentPHP: total, rate, budgetHkd } = await loadWidgetData(activeTrip);
+      todaySpentPHP = today || 0;
+      budgetLeftHKD = Math.max(0, budgetHkd - (total / rate));
+    }
+  } catch (err) {
+    console.error("GalaFund Widget Task Handler Data Load Error:", err);
+  }
 
-    case "WIDGET_CLICK":
-      if (props.clickAction === "OPEN_ADD_EXPENSE") {
-        await props.requestWidgetUpdate?.();
-        Linking.openURL("galafund://add");
-      }
-      break;
+  try {
+    switch (props.widgetAction) {
+      case "WIDGET_ADDED":
+      case "WIDGET_UPDATE":
+      case "WIDGET_RESIZED":
+        props.renderWidget(
+          <QuickAddWidget totalSpentPHP={todaySpentPHP} budgetLeftHKD={budgetLeftHKD} />
+        );
+        break;
 
-    default:
-      break;
+      case "WIDGET_CLICK":
+        if (props.clickAction === "OPEN_ADD_EXPENSE") {
+          await props.requestWidgetUpdate?.();
+          Linking.openURL("galafund://add");
+        }
+        break;
+
+      default:
+        break;
+    }
+  } catch (renderErr) {
+    console.error("GalaFund Widget Render Error:", renderErr);
   }
 }
