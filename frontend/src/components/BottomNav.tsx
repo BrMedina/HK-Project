@@ -35,7 +35,7 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
       </Pressable>
 
       <View style={styles.scanButtonContainer}>
-        <Pressable style={styles.scanButton}>
+        <Pressable style={styles.scanButton} onPress={() => router.replace("/scan")}>
           <Camera size={24} color="#fff" />
         </Pressable>
       </View>

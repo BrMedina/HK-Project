@@ -2,10 +2,10 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-// 1. Add support for .wasm files
+// Add support for .wasm files
 config.resolver.assetExts.push('wasm');
 
-// 2. Add COEP and COOP headers to support SharedArrayBuffer (required by expo-sqlite on web)
+// Add COEP and COOP headers to support SharedArrayBuffer (required by expo-sqlite on web)
 config.server.enhanceMiddleware = (middleware) => {
   return (req, res, next) => {
     res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
