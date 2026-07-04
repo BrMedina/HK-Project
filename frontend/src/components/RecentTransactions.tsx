@@ -5,6 +5,8 @@ import { Expense } from "../db/useDashboard";
 
 type Props = {
   expenses: Expense[];
+  currency?: string;
+  exchangeRate?: number;
 };
 
 const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; bg: string }> = {
@@ -25,7 +27,7 @@ function formatDate(timestamp: number | null): string {
   return d.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export default function RecentTransactions({ expenses }: Props) {
+export default function RecentTransactions({ expenses, currency = "PHP", exchangeRate = 1 }: Props) {
   const recent = expenses.slice(0, 5);
 
   return (
@@ -47,6 +49,7 @@ export default function RecentTransactions({ expenses }: Props) {
           recent.map((expense, index) => {
             const { icon, bg } = getIconConfig(expense.category);
             const isLast = index === recent.length - 1;
+            const displayAmount = currency === "HKD" && exchangeRate > 0 ? expense.php_amount / exchangeRate : expense.php_amount;
             return (
               <View key={expense.id} style={[styles.transactionItem, isLast && styles.transactionItemLast]}>
                 <View style={[styles.transIconContainer, { backgroundColor: bg }]}>
@@ -61,7 +64,7 @@ export default function RecentTransactions({ expenses }: Props) {
                   </Text>
                 </View>
                 <Text style={styles.transAmount}>
-                  -PHP {expense.php_amount.toLocaleString("en-PH")}
+                  -{currency === "HKD" ? "HKD" : "PHP"} {displayAmount.toLocaleString(currency === "HKD" ? "en-US" : "en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </Text>
               </View>
             );

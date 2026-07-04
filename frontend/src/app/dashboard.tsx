@@ -44,12 +44,18 @@ export default function Dashboard() {
             spentPhp={totalSpent}
             remainingPhp={remainingPhp}
             spentPercent={spentPercent}
+            currency={trip?.currency_preference || "PHP"}
+            exchangeRate={trip?.exchange_rate || 6.5}
           />
           <QuickOverview
             categoryTotals={categoryTotals}
             totalSpent={totalSpent}
           />
-          <RecentTransactions expenses={expenses} />
+          <RecentTransactions 
+            expenses={expenses} 
+            currency={trip?.currency_preference || "PHP"}
+            exchangeRate={trip?.exchange_rate || 6.5}
+          />
           <View style={styles.spacer} />
         </ScrollView>
       )}

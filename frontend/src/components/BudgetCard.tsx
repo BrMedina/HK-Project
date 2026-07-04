@@ -1,39 +1,61 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
-import Svg, { Circle } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 
 type Props = {
   budgetPhp: number;
   spentPhp: number;
   remainingPhp: number;
   spentPercent: number;
+  currency?: string;
+  exchangeRate?: number;
 };
 
-function formatPhp(amount: number) {
+function formatCurrency(amount: number, currency: string = "PHP") {
+  if (currency === "HKD") {
+    return `HKD ${amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
   return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPercent }: Props) {
-  const fillWidth = `${Math.min(spentPercent, 100)}%` as `${number}%`;
+function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+  return {
+    x: centerX + radius * Math.cos(angleInRadians),
+    y: centerY + radius * Math.sin(angleInRadians),
+  };
+}
 
-  // Circular Progress Calculation
+function describeArc(cx: number, cy: number, radius: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(cx, cy, radius, endAngle);
+  const end = polarToCartesian(cx, cy, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+}
+
+export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPercent, currency = "PHP", exchangeRate = 1 }: Props) {
+  const displayBudget = currency === "HKD" && exchangeRate > 0 ? budgetPhp / exchangeRate : budgetPhp;
+  const displaySpent = currency === "HKD" && exchangeRate > 0 ? spentPhp / exchangeRate : spentPhp;
+  const displayRemaining = currency === "HKD" && exchangeRate > 0 ? remainingPhp / exchangeRate : remainingPhp;
+
+  const fillWidth = `${Math.min(spentPercent, 100)}%` as `${number}%`;
+  const safePercent = Math.min(Math.max(spentPercent, 0), 100);
   const size = 64;
   const strokeWidth = 6;
-  const radius = (size - strokeWidth) / 2; // (64 - 6) / 2 = 29
-  const circumference = 2 * Math.PI * radius; // ~182.2
-  const progress = Math.min(spentPercent, 100) / 100;
-  const strokeDashoffset = circumference - progress * circumference;
+  const radius = (size - strokeWidth) / 2;
+  const progress = safePercent / 100;
+  const endAngle = -90 + progress * 360;
+  const arcPath = describeArc(size / 2, size / 2, radius, -90, endAngle);
 
   return (
     <View style={styles.budgetCard}>
       <View style={styles.budgetTopRow}>
         <View style={styles.budgetLeft}>
           <Text style={styles.budgetLabel}>Total Budget</Text>
-          <Text style={styles.budgetValue}>{formatPhp(budgetPhp)}</Text>
+          <Text style={styles.budgetValue}>{formatCurrency(displayBudget, currency)}</Text>
         </View>
         <View style={styles.progressCircleContainer}>
           <Svg width={size} height={size} style={styles.svg}>
-            {/* Background Circle */}
             <Circle
               cx={size / 2}
               cy={size / 2}
@@ -42,20 +64,15 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
               strokeWidth={strokeWidth}
               fill="transparent"
             />
-            {/* Progress Circle */}
-            <Circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke="#39baa6"
-              strokeWidth={strokeWidth}
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              fill="transparent"
-              origin={`${size / 2}, ${size / 2}`}
-              rotation="-90"
-            />
+            {progress > 0 && (
+              <Path
+                d={arcPath}
+                stroke="#39baa6"
+                strokeWidth={strokeWidth}
+                fill="transparent"
+                strokeLinecap="round"
+              />
+            )}
           </Svg>
           <Image
             source={require("../../assets/galafund.png")}
@@ -68,7 +85,7 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
       <View style={styles.budgetBottom}>
         <View style={styles.spentInfo}>
           <Text style={styles.spentText}>
-            Spent <Text style={styles.spentAmount}>{formatPhp(spentPhp)}</Text> • {spentPercent}%
+            Spent <Text style={styles.spentAmount}>{formatCurrency(displaySpent, currency)}</Text> • {spentPercent}%
           </Text>
         </View>
         <View style={styles.progressBarBg}>
@@ -76,7 +93,7 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
         </View>
         <View style={styles.remainingRow}>
           <Text style={styles.remainingLabel}>Remaining</Text>
-          <Text style={styles.remainingValue}>{formatPhp(remainingPhp)}</Text>
+          <Text style={styles.remainingValue}>{formatCurrency(displayRemaining, currency)}</Text>
         </View>
       </View>
     </View>

@@ -1,0 +1,210 @@
+<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#3d4946",
+                    "surface-bright": "#f8f9ff",
+                    "primary-fixed": "#7ef7e1",
+                    "surface-dim": "#cbdbf5",
+                    "surface-container-low": "#eff4ff",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed": "#00201b",
+                    "inverse-primary": "#60dac5",
+                    "tertiary-container": "#a0a7b9",
+                    "on-background": "#0b1c30",
+                    "surface-variant": "#d3e4fe",
+                    "secondary-fixed-dim": "#acc7ff",
+                    "tertiary-fixed": "#dce2f5",
+                    "on-tertiary-container": "#363d4b",
+                    "surface-tint": "#006b5e",
+                    "on-secondary-fixed": "#001a40",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#585e6e",
+                    "tertiary-fixed-dim": "#c0c6d8",
+                    "on-secondary-container": "#fefcff",
+                    "on-primary-container": "#00453c",
+                    "primary": "#006b5e",
+                    "secondary": "#0059b9",
+                    "surface": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed": "#d7e2ff",
+                    "on-primary-fixed-variant": "#005046",
+                    "outline": "#6d7a76",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-container-high": "#dce9ff",
+                    "inverse-surface": "#213145",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#151c29",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary-fixed-variant": "#404756",
+                    "outline-variant": "#bcc9c5",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#004591",
+                    "background": "#f8f9ff",
+                    "secondary-container": "#0071e7",
+                    "primary-container": "#39baa6",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#60dac5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-mobile": "1.25rem",
+                    "gutter": "1rem",
+                    "stack-md": "1.5rem",
+                    "stack-sm": "0.5rem",
+                    "base": "8px",
+                    "container-padding-desktop": "2.5rem"
+            },
+            "fontFamily": {
+                    "numeric-display": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "label-caps": ["Be Vietnam Pro"],
+                    "body-sm": ["Be Vietnam Pro"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "title-md": ["Be Vietnam Pro"]
+            },
+            "fontSize": {
+                    "numeric-display": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "title-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    }catch(_e){}</script></head><body class="bg-background text-on-background font-body-lg min-h-screen pb-24">
+    <!-- Top AppBar -->
+    <header class="glass-header sticky top-0 z-40 bg-background/80 flex justify-between items-center w-full px-container-padding-mobile pt-4 pb-2 border-b border-outline-variant/20">
+        <div class="flex items-center gap-3">
+            <button class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity">menu</button>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Transactions</h1>
+        </div>
+        <button class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity">notifications</button>
+    </header>
+
+    <main class="px-container-padding-mobile space-y-stack-md pt-4">
+        <!-- Search & Filter Section -->
+        <section class="space-y-4">
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+                <input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary font-body-lg transition-all shadow-sm" placeholder="Search transactions..." type="text">
+            </div>
+            <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <button class="px-5 py-2 rounded-full bg-primary text-on-primary font-label-caps text-label-caps whitespace-nowrap active:scale-95 transition-transform">All</button>
+                <button class="px-5 py-2 rounded-full bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">Food</button>
+                <button class="px-5 py-2 rounded-full bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">Transport</button>
+                <button class="px-5 py-2 rounded-full bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">Shopping</button>
+                <button class="px-5 py-2 rounded-full bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps whitespace-nowrap hover:bg-surface-variant transition-colors">Activities</button>
+            </div>
+        </section>
+
+        <!-- Transaction List Grouped by-->
+        <section class="space-y-6">
+            <!-- Today Group -->
+            <div class="space-y-3">
+                <h3 class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Today, May 21</h3>
+                <!-- Transaction Card 1 -->
+                <div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 active:scale-[0.98] transition-transform">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+                        </div>
+                        <div>
+                            <p class="font-title-md text-title-md text-on-surface">Mak's Noodle (Central)</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Food • 12:45 PM</p>
+                        </div>
+                    </div>
+                    <p class="font-numeric-display text-numeric-display text-on-surface">-PHP 420</p>
+                </div>
+                <!-- Transaction Card 2 -->
+                <div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 active:scale-[0.98] transition-transform">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">commute</span>
+                        </div>
+                        <div>
+                            <p class="font-title-md text-title-md text-on-surface">Star Ferry Pier</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Transport • 02:30 PM</p>
+                        </div>
+                    </div>
+                    <p class="font-numeric-display text-numeric-display text-on-surface">-PHP 65</p>
+                </div>
+            </div>
+
+            <!-- Yesterday Group -->
+            <div class="space-y-3">
+                <h3 class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Yesterday, May 20</h3>
+                <!-- Transaction Card 3 -->
+                <div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 active:scale-[0.98] transition-transform">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center">
+                            <span class="material-symbols-outlined text-on-tertiary-fixed" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+                        </div>
+                        <div>
+                            <p class="font-title-md text-title-md text-on-surface">Miniso (Nathan Road)</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Shopping • 08:15 PM</p>
+                        </div>
+                    </div>
+                    <p class="font-numeric-display text-numeric-display text-on-surface">-PHP 450</p>
+                </div>
+                <!-- Transaction Card 4 -->
+                <div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 active:scale-[0.98] transition-transform">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">train</span>
+                        </div>
+                        <div>
+                            <p class="font-title-md text-title-md text-on-surface">MTR Octopus Top-up</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Transport • 09:00 AM</p>
+                        </div>
+                    </div>
+                    <p class="font-numeric-display text-numeric-display text-on-surface">-PHP 150</p>
+                </div>
+                <!-- Transaction Card 5 -->
+                <div class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 active:scale-[0.98] transition-transform">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">brunch_dining</span>
+                        </div>
+                        <div>
+                            <p class="font-title-md text-title-md text-on-surface">DimDimSum (Tsim Sha Tsui)</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Food • 11:30 AM</p>
+                        </div>
+                    </div>
+                    <p class="font-numeric-display text-numeric-display text-on-surface">-PHP 320</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contextual FAB -->
+    
+
+    <!-- BottomNavBar -->
+    <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-surface shadow-[0_-1px_10px_rgba(0,0,0,0.05)] z-50 border-t border-outline-variant"><a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-lg" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-caps text-[10px] mt-1">Dashboard</span></a><a class="flex flex-col items-center justify-center text-secondary font-bold hover:bg-surface-container-low transition-colors p-2 rounded-lg" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span><span class="font-label-caps text-[10px] mt-1">Transactions</span></a><button class="w-12 h-12 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform"><span class="material-symbols-outlined">photo_camera</span></button><a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-lg" href="#"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-label-caps text-[10px] mt-1">Budget</span></a><a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-lg" href="#"><span class="material-symbols-outlined">currency_exchange</span><span class="font-label-caps text-[10px] mt-1">Converter</span></a></nav>
+
+    <!-- Decorative Atmosphere (Skyline Overlay) -->
+    <div class="fixed top-0 left-0 w-full h-48 -z-10 skyline-mesh pointer-events-none opacity-30"></div>
+
+    <script class="">
+        // Simple Interaction logic for filter chips
+        const filterChips = document.querySelectorAll('button.font-label-caps');
+        filterChips.forEach(chip => {
+            chip.</script></body></html>

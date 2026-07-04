@@ -14,10 +14,10 @@ export async function createTrip(name, budgetHkd, exchangeRate) {
   const id = genId();
   const now = Date.now();
   await db.runAsync(
-    "INSERT INTO trips (id, name, budget_hkd, exchange_rate, created_at) VALUES (?, ?, ?, ?, ?)",
-    [id, name, budgetHkd, exchangeRate, now]
+    "INSERT INTO trips (id, name, budget_hkd, exchange_rate, created_at, duration_days, currency_preference) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [id, name, budgetHkd, exchangeRate, now, 7, "PHP"]
   );
-  return { id, name, budget_hkd: budgetHkd, exchange_rate: exchangeRate, created_at: now };
+  return { id, name, budget_hkd: budgetHkd, exchange_rate: exchangeRate, created_at: now, duration_days: 7, currency_preference: "PHP" };
 }
 
 export async function addExpense(tripId, { phpAmount, category, note, transactionDate, source = "manual" }) {
@@ -64,4 +64,20 @@ export async function getTotalsByCategory(tripId) {
 export async function deleteExpense(expenseId) {
   const db = await getDB();
   await db.runAsync("DELETE FROM expenses WHERE id = ?", [expenseId]);
+}
+
+export async function updateTripPreferences(tripId, durationDays, currencyPreference, budgetHkd) {
+  const db = await getDB();
+  await db.runAsync(
+    "UPDATE trips SET duration_days = ?, currency_preference = ?, budget_hkd = ? WHERE id = ?",
+    [durationDays, currencyPreference, budgetHkd, tripId]
+  );
+}
+
+export async function updateTripExchangeRate(tripId, exchangeRate) {
+  const db = await getDB();
+  await db.runAsync(
+    "UPDATE trips SET exchange_rate = ? WHERE id = ?",
+    [exchangeRate, tripId]
+  );
 }

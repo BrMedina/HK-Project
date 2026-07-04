@@ -11,6 +11,8 @@ export type Trip = {
   budget_hkd: number;
   exchange_rate: number;
   created_at: number;
+  duration_days?: number;
+  currency_preference?: string;
 };
 
 export type Expense = {

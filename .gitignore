@@ -41,13 +41,28 @@ ios/*.xcworkspace
 *.cer
 *.der
 *.crt
+*.key
+*.p12
+*.p8
+*.jks
+*.keystore
+*.apk
+*.aab
+*.db
+*.sqlite
+*.sqlite3
+GoogleService-Info.plist
+google-services.json
+local.properties
 secrets/
+.envrc
 
 # OS / editor files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+frontend/.claude/
 
 # Coverage / temp output
 coverage/

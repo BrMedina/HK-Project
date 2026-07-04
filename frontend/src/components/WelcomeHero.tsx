@@ -5,7 +5,7 @@ import { Cloud } from "lucide-react-native";
 export default function WelcomeHero() {
   return (
     <ImageBackground
-      source={require("../../assets/homepage.jpg")}
+      source={require("../../assets/homepage.png")}
       style={styles.heroBackground}
       imageStyle={styles.heroImage}
     >

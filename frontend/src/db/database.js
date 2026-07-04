@@ -25,5 +25,18 @@ export async function getDB() {
       created_at INTEGER NOT NULL
     );
   `);
+
+  // Migrate: add columns to trips if they do not exist
+  try {
+    await _db.execAsync("ALTER TABLE trips ADD COLUMN duration_days INTEGER DEFAULT 7;");
+  } catch (e) {
+    // Column already exists
+  }
+  try {
+    await _db.execAsync("ALTER TABLE trips ADD COLUMN currency_preference TEXT DEFAULT 'PHP';");
+  } catch (e) {
+    // Column already exists
+  }
+
   return _db;
 }
