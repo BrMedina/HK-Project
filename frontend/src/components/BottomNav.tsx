@@ -10,7 +10,7 @@ type Props = {
 export default function BottomNav({ activeTab = "dashboard" }: Props) {
   return (
     <View style={styles.bottomNav}>
-      <Pressable style={styles.navItem} onPress={() => router.replace("/dashboard")}>
+      <Pressable style={styles.navItem} onPress={() => activeTab !== "dashboard" && router.replace("/dashboard")}>
         <LayoutGrid size={22} color={activeTab === "dashboard" ? "#39baa6" : "#717786"} />
         <Text
           style={[
@@ -22,7 +22,7 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
         </Text>
       </Pressable>
 
-      <Pressable style={styles.navItem} onPress={() => router.replace("/transactions")}>
+      <Pressable style={styles.navItem} onPress={() => activeTab !== "transactions" && router.replace("/transactions")}>
         <ClipboardList size={22} color={activeTab === "transactions" ? "#39baa6" : "#717786"} />
         <Text
           style={[
@@ -42,7 +42,7 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
 
       <Pressable
         style={styles.navItem}
-        onPress={() => router.replace("/budget")}
+        onPress={() => activeTab !== "budget" && router.replace("/budget")}
       >
         <Wallet
           size={22}
@@ -58,7 +58,7 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
         </Text>
       </Pressable>
 
-      <Pressable style={styles.navItem} onPress={() => router.replace("/convert")}>
+      <Pressable style={styles.navItem} onPress={() => activeTab !== "convert" && router.replace("/convert")}>
         <Coins size={22} color={activeTab === "convert" ? "#39baa6" : "#717786"} />
         <Text
           style={[

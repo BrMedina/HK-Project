@@ -6,6 +6,7 @@ import { Stack, router } from "expo-router";
 import { Menu, Bell, Search, Utensils, Train, ShoppingBag, Camera, HelpCircle } from "lucide-react-native";
 import { getAllTrips, getExpensesForTrip } from "../db/queries";
 import BottomNav from "../components/BottomNav";
+import Header from "../components/Header";
 
 type Expense = {
   id: string;
@@ -95,18 +96,7 @@ export default function TransactionsScreen() {
       <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconButton}>
-            <Menu size={22} color="#006b5e" />
-          </Pressable>
-          <Text style={styles.headerTitle}>Transactions</Text>
-        </View>
-        <Pressable style={styles.iconButton}>
-          <Bell size={22} color="#006b5e" />
-        </Pressable>
-      </View>
+      <Header tripName="Transactions" />
 
       {/* Main Content */}
       {loading ? (

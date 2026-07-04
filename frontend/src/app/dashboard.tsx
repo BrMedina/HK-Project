@@ -29,7 +29,7 @@ export default function Dashboard() {
       <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Header tripName={trip?.name ?? "My Trip"} />
+      <Header tripName={trip?.name ?? "My Trip"} showDropdown={true} />
 
       {loading ? (
         <View style={styles.loadingContainer}>

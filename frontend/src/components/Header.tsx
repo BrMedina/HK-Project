@@ -1,12 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
-import { ChevronDown, Bell, ArrowRight, Plane } from "lucide-react-native";
+import { ChevronDown, Bell } from "lucide-react-native";
 
 type Props = {
   tripName?: string;
+  showDropdown?: boolean;
 };
 
-export default function Header({ tripName = "My Trip" }: Props) {
+export default function Header({ tripName = "My Trip", showDropdown = false }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.mainHeader}>
@@ -15,22 +16,14 @@ export default function Header({ tripName = "My Trip" }: Props) {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Pressable style={styles.tripSelector}>
+        <Pressable style={styles.tripSelector} disabled={!showDropdown}>
           <Text style={styles.tripTitle}>{tripName}</Text>
-          <ChevronDown size={18} color="#181c23" strokeWidth={2.5} />
+          {showDropdown && <ChevronDown size={18} color="#181c23" strokeWidth={2.5} />}
         </Pressable>
         <Pressable style={styles.notificationButton}>
           <Bell size={22} color="#181c23" />
           <View style={styles.notificationBadge} />
         </Pressable>
-      </View>
-
-      <View style={styles.routeHeader}>
-        <Text style={styles.routeText}>From Philippines 🇵🇭</Text>
-        <ArrowRight size={12} color="#c1c6d7" />
-        <Plane size={14} color="#c1c6d7" />
-        <ArrowRight size={12} color="#c1c6d7" />
-        <Text style={styles.routeText}>Hong Kong 🇭🇰</Text>
       </View>
     </View>
   );
@@ -39,6 +32,8 @@ export default function Header({ tripName = "My Trip" }: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f3fe",
   },
   mainHeader: {
     flexDirection: "row",
@@ -46,7 +41,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 8,
+    paddingBottom: 10,
   },
   logo: {
     width: 24,
@@ -76,19 +71,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#ef4444",
     borderWidth: 1.5,
     borderColor: "#fff",
-  },
-  routeHeader: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f3fe",
-  },
-  routeText: {
-    fontSize: 12,
-    color: "#414754",
-    fontWeight: "500",
   },
 });

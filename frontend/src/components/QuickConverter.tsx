@@ -26,6 +26,8 @@ export default function QuickConverter({
 
   return (
     <View style={s.card}>
+      <View style={s.connectorLineTop} />
+      <View style={s.connectorLineBottom} />
       <View style={s.titleRow}>
         <RefreshCw size={18} color="#39baa6" />
         <Text style={s.title}>Quick Converter</Text>
@@ -108,7 +110,25 @@ const s = StyleSheet.create({
   currencySymbol: { fontSize: 22, fontWeight: "700", color: "#717786", marginRight: 10, minWidth: 20 },
   input: { flex: 1, fontSize: 22, fontWeight: "700", color: "#181c23", padding: 0 },
 
-  swapRow: { alignItems: "center", marginVertical: 2, zIndex: 1 },
+  swapRow: { alignItems: "flex-end", marginVertical: 2, zIndex: 1 },
+  connectorLineTop: {
+    position: "absolute",
+    right: 41,
+    top: 92,
+    height: 28,
+    width: 2,
+    backgroundColor: "#39baa6",
+    zIndex: 0,
+  },
+  connectorLineBottom: {
+    position: "absolute",
+    right: 41,
+    top: 164,
+    height: 28,
+    width: 2,
+    backgroundColor: "#39baa6",
+    zIndex: 0,
+  },
   swapBtn: {
     width: 44, height: 44, borderRadius: 22, backgroundColor: "#007dfe",
     alignItems: "center", justifyContent: "center",

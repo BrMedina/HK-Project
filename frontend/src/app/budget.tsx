@@ -7,6 +7,7 @@ import { Menu, Bell, Calendar, ShieldCheck, Settings, ChevronDown, Utensils, Tra
 import { getAllTrips, getExpensesForTrip, updateTripPreferences } from "../db/queries";
 import BottomNav from "../components/BottomNav";
 import BudgetCard from "../components/BudgetCard";
+import Header from "../components/Header";
 
 type Trip = {
   id: string;
@@ -158,18 +159,7 @@ export default function BudgetScreen() {
       <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconButton}>
-            <Menu size={22} color="#006b5e" />
-          </Pressable>
-          <Text style={styles.headerTitle}>{trip?.name ?? "Trip Budget"}</Text>
-        </View>
-        <Pressable style={styles.iconButton}>
-          <Bell size={22} color="#006b5e" />
-        </Pressable>
-      </View>
+      <Header tripName={trip?.name ?? "Trip Budget"} />
 
       {loading ? (
         <View style={styles.loadingContainer}>

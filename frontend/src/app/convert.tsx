@@ -7,6 +7,7 @@ import { TrendingUp, RotateCcw } from "lucide-react-native";
 
 import { useConverter } from "../db/useConverter";
 import BottomNav from "../components/BottomNav";
+import Header from "../components/Header";
 import QuickConverter from "../components/QuickConverter";
 import ManualRateCard from "../components/ManualRateCard";
 
@@ -18,6 +19,7 @@ export default function ConvertScreen() {
       <SafeAreaView style={s.safe} edges={["top"]}>
         <StatusBar style="dark" />
         <Stack.Screen options={{ headerShown: false }} />
+        <Header tripName="Currency Converter" />
         <View style={s.loading}>
           <ActivityIndicator size="large" color="#39baa6" />
           <Text style={s.loadingText}>Loading converter…</Text>
@@ -32,6 +34,7 @@ export default function ConvertScreen() {
       <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false }} />
 
+      <Header tripName="Currency Converter" />
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* Hero Header */}
         <ImageBackground
