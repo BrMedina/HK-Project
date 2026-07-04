@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Train, Utensils, ShoppingBag, Camera, Ticket, HelpCircle } from "lucide-react-native";
 import { router } from "expo-router";
 import { Expense } from "../db/useDashboard";
+import { getCategoryColor } from "../lib/categoryColors";
 
 type Props = {
   expenses: Expense[];
@@ -11,10 +12,10 @@ type Props = {
 };
 
 const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; bg: string }> = {
-  Food: { icon: <Utensils size={20} color="#f97316" />, bg: "#ffedd5" },
-  Transport: { icon: <Train size={20} color="#ef4444" />, bg: "#fee2e2" },
-  Shopping: { icon: <ShoppingBag size={20} color="#a855f7" />, bg: "#f3e8ff" },
-  Activities: { icon: <Camera size={20} color="#007dfe" />, bg: "#dbeafe" },
+  Food: { icon: <Utensils size={20} color={getCategoryColor("Food").color} />, bg: getCategoryColor("Food").bg },
+  Transport: { icon: <Train size={20} color={getCategoryColor("Transport").color} />, bg: getCategoryColor("Transport").bg },
+  Shopping: { icon: <ShoppingBag size={20} color={getCategoryColor("Shopping").color} />, bg: getCategoryColor("Shopping").bg },
+  Activities: { icon: <Camera size={20} color={getCategoryColor("Activities").color} />, bg: getCategoryColor("Activities").bg },
   Entertainment: { icon: <Ticket size={20} color="#39baa6" />, bg: "#d1fae5" },
 };
 

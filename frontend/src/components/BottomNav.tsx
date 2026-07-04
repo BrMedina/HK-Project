@@ -36,7 +36,7 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
 
       <View style={styles.scanButtonContainer}>
         <Pressable style={styles.scanButton} onPress={() => router.replace("/scan")}>
-          <Camera size={24} color="#fff" />
+          <Camera size={24} color="#39baa6" />
         </Pressable>
       </View>
 
@@ -117,10 +117,10 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: "#007dfe",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#007dfe",
+    shadowColor: "#39baa6",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,

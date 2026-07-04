@@ -8,7 +8,7 @@ function getWeatherIcon(iconId?: number) {
   if (iconId === 50 || iconId === 51) return <Sun size={16} color="#f59e0b" />;
   if (iconId === 52) return <CloudSun size={16} color="#39baa6" />;
   if (iconId === 53 || iconId === 54) return <CloudLightning size={16} color="#3b82f6" />;
-  if ([62, 63, 64, 65].includes(iconId)) return <CloudRain size={16} color="#3b82f6" />;
+  if ([62, 63, 64, 65].includes(iconId)) return <CloudRain size={16} color="#39baa6" />;
   return <Cloud size={16} color="#39baa6" />;
 }
 
@@ -42,7 +42,7 @@ export default function WelcomeHero() {
 
   return (
     <ImageBackground
-      source={require("../../assets/homepage.png")}
+      source={require("../../assets/afternoon-homepage.png")}
       style={styles.heroBackground}
       imageStyle={styles.heroImage}
     >
@@ -89,13 +89,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     height: "100%",
+    width: "100%",
   },
   heroGreeting: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#39baa6",
+    color: "#ffffff",
     marginBottom: 4,
-    textShadowColor: "rgba(255,255,255,0.8)",
+    textShadowColor: "#39baa6",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -119,6 +120,8 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.5)",
+    alignSelf: "flex-start",
+    marginTop: -4,
   },
   weatherInfo: {
     flexDirection: "column",

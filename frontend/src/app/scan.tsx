@@ -18,13 +18,15 @@ import { ChevronLeft, QrCode, Receipt, Save, RefreshCw } from "lucide-react-nati
 import { getAllTrips, createTrip, addExpense } from "../db/queries";
 import QRScannerScreen from "../scanner/QRScannerScreen";
 import ReceiptScannerScreen from "../scanner/ReceiptScannerScreen";
+import { getCategoryColor } from "../lib/categoryColors";
 
-const CATEGORIES = ["Food", "Transport", "Shopping", "Activities", "Entertainment"];
+const CATEGORIES = ["Food", "Transport", "Shopping", "Activities"];
 
 export default function ScanScreen() {
   const [activeTab, setActiveTab] = useState<"qr" | "ocr">("qr");
   const [tripId, setTripId] = useState<string | null>(null);
   const [loadingTrip, setLoadingTrip] = useState(true);
+  const [manualEntryMode, setManualEntryMode] = useState(false);
 
   // Scanned result state
   const [scannedData, setScannedData] = useState<{
@@ -33,7 +35,7 @@ export default function ScanScreen() {
     note?: string | null;
     referenceNumber?: string | null;
     date?: string | null;
-    source: "qr" | "ocr";
+    source: "qr" | "ocr" | "manual";
   } | null>(null);
 
   // Editable form state
@@ -65,6 +67,7 @@ export default function ScanScreen() {
 
   const handleScanned = (data: any) => {
     // Populate form with parsed values
+    setManualEntryMode(false);
     setScannedData(data);
     setAmountInput(data.amount ? Math.round(data.amount).toString() : "");
     setNoteInput(data.merchantName || data.note || "");
@@ -81,6 +84,22 @@ export default function ScanScreen() {
     } else {
       setSelectedCategory("Food"); // default
     }
+  };
+
+  const handleManualEntry = () => {
+    setActiveTab("qr");
+    setManualEntryMode(true);
+    setScannedData({
+      amount: null,
+      merchantName: null,
+      note: null,
+      referenceNumber: null,
+      date: null,
+      source: "manual",
+    });
+    setAmountInput("");
+    setNoteInput("");
+    setSelectedCategory("Food");
   };
 
   const handleSave = async () => {
@@ -137,8 +156,12 @@ export default function ScanScreen() {
         >
           <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
             <View style={styles.formCard}>
-              <Text style={styles.formTitle}>Confirm Scanned Details</Text>
-              <Text style={styles.formSub}>Parsed via {scannedData.source === "qr" ? "QR PH code" : "ML Kit OCR"}</Text>
+              <Text style={styles.formTitle}>{manualEntryMode ? "Manual Expense Entry" : "Confirm Scanned Details"}</Text>
+              <Text style={styles.formSub}>
+                {manualEntryMode
+                  ? "enter the expense details manually"
+                  : `Parsed via ${scannedData.source === "qr" ? "QR PH code" : "ML Kit OCR"}`}
+              </Text>
 
               {/* Amount input */}
               <View style={styles.inputGroup}>
@@ -171,13 +194,25 @@ export default function ScanScreen() {
                 <View style={styles.categoryRow}>
                   {CATEGORIES.map((cat) => {
                     const isSelected = selectedCategory === cat;
+                    const categoryColor = getCategoryColor(cat);
                     return (
                       <Pressable
                         key={cat}
-                        style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
+                        style={[
+                          styles.categoryChip,
+                          isSelected && {
+                            backgroundColor: categoryColor.bg,
+                            borderColor: categoryColor.color,
+                          },
+                        ]}
                         onPress={() => setSelectedCategory(cat)}
                       >
-                        <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
+                        <Text
+                          style={[
+                            styles.categoryChipText,
+                            isSelected && { color: categoryColor.color, fontWeight: "700" },
+                          ]}
+                        >
                           {cat}
                         </Text>
                       </Pressable>
@@ -188,12 +223,12 @@ export default function ScanScreen() {
 
               {/* Actions */}
               <View style={styles.btnRow}>
-                <Pressable style={styles.retryBtn} onPress={() => setScannedData(null)}>
+                <Pressable style={styles.actionBtn} onPress={() => setScannedData(null)}>
                   <RefreshCw size={18} color="#717786" />
                   <Text style={styles.retryBtnText}>Scan Again</Text>
                 </Pressable>
 
-                <Pressable style={[styles.saveBtn, !amountInput && styles.saveBtnDisabled]} onPress={handleSave} disabled={saving || !amountInput}>
+                <Pressable style={[styles.actionBtn, styles.saveBtn, !amountInput && styles.saveBtnDisabled]} onPress={handleSave} disabled={saving || !amountInput}>
                   {saving ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
@@ -210,6 +245,15 @@ export default function ScanScreen() {
       ) : (
         /* Camera Scanner mode */
         <View style={{ flex: 1 }}>
+          {/* Camera Frame */}
+          <View style={styles.cameraBox}>
+            {activeTab === "qr" ? (
+              <QRScannerScreen onScanned={handleScanned} onManualEntry={handleManualEntry} />
+            ) : (
+              <ReceiptScannerScreen onScanned={handleScanned} />
+            )}
+          </View>
+
           {/* Tab Selector */}
           <View style={styles.tabContainer}>
             <Pressable
@@ -226,15 +270,6 @@ export default function ScanScreen() {
               <Receipt size={18} color={activeTab === "ocr" ? "#007dfe" : "#717786"} />
               <Text style={[styles.tabText, activeTab === "ocr" && styles.tabTextActive]}>Receipt OCR</Text>
             </Pressable>
-          </View>
-
-          {/* Camera Frame */}
-          <View style={styles.cameraBox}>
-            {activeTab === "qr" ? (
-              <QRScannerScreen onScanned={handleScanned} />
-            ) : (
-              <ReceiptScannerScreen onScanned={handleScanned} />
-            )}
           </View>
         </View>
       )}
@@ -265,7 +300,7 @@ const styles = StyleSheet.create({
     padding: 6,
     backgroundColor: "#fff",
     marginHorizontal: 20,
-    marginTop: 16,
+    marginTop: 8,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "rgba(193,198,215,0.25)",
@@ -287,7 +322,8 @@ const styles = StyleSheet.create({
   cameraBox: {
     flex: 1,
     marginHorizontal: 20,
-    marginVertical: 16,
+    marginTop: 16,
+    marginBottom: 8,
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: "#000",
@@ -333,12 +369,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "transparent",
   },
-  categoryChipActive: {
-    backgroundColor: "rgba(57,186,166,0.1)",
-    borderColor: "#39baa6",
-  },
   categoryChipText: { fontSize: 13, fontWeight: "600", color: "#717786" },
-  categoryChipTextActive: { color: "#39baa6", fontWeight: "700" },
 
   // Form Buttons
   btnRow: { flexDirection: "row", gap: 12, marginTop: 12 },
@@ -366,4 +397,15 @@ const styles = StyleSheet.create({
   },
   saveBtnDisabled: { backgroundColor: "#c1c6d7" },
   saveBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+  actionBtn: {
+    flex: 1,
+    minHeight: 54,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
 });

@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Pressable, Platform } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { parseEMVQR } from "./emvQrParser";
 
-export default function QRScannerScreen({ onScanned }) {
+export default function QRScannerScreen({ onScanned, onManualEntry }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
@@ -67,8 +67,13 @@ export default function QRScannerScreen({ onScanned }) {
             onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           />
           <View style={s.overlay}>
-            <View style={s.frame} />
-            <Text style={s.hint}>Point at a QR PH / GCash code</Text>
+            <View style={s.overlayContent}>
+              <View style={s.frame} />
+              <Text style={s.hint}>Point at a QR PH / GCash code</Text>
+              <Pressable style={s.manualBtn} onPress={onManualEntry}>
+                <Text style={s.manualBtnText}>Manual Input</Text>
+              </Pressable>
+            </View>
           </View>
         </>
       )}
@@ -82,7 +87,17 @@ const s = StyleSheet.create({
   sub: { fontSize: 13, color: "#717786", textAlign: "center", marginBottom: 24 },
   btn: { backgroundColor: "#007dfe", paddingVertical: 12, paddingHorizontal: 20, borderRadius: 12 },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  overlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center", gap: 20 },
+  overlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center" },
+  overlayContent: { alignItems: "center", justifyContent: "center", gap: 16, transform: [{ translateY: 70 }] },
   frame: { width: 220, height: 220, borderWidth: 2, borderColor: "#fff", borderRadius: 16 },
   hint: { color: "#fff", fontWeight: "600", fontSize: 14, textShadowColor: "#000", textShadowRadius: 4 },
+  manualBtn: {
+    backgroundColor: "rgba(255,255,255,0.14)",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  manualBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
 });

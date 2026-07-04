@@ -4,10 +4,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Stack, router } from "expo-router";
 import { Menu, Bell, Calendar, ShieldCheck, Settings, ChevronDown, Utensils, Train, ShoppingBag, Camera, HelpCircle, Wallet } from "lucide-react-native";
-import { getAllTrips, getExpensesForTrip, updateTripPreferences } from "../db/queries";
+import { getAllTrips, getExpensesForTrip, updateTripPreferences, deleteAllExpensesForTrip } from "../db/queries";
 import BottomNav from "../components/BottomNav";
 import BudgetCard from "../components/BudgetCard";
 import Header from "../components/Header";
+import { getCategoryColor } from "../lib/categoryColors";
+import ResetTransactionsDialog from "../components/ResetTransactionsDialog";
 
 type Trip = {
   id: string;
@@ -45,10 +47,10 @@ const CATEGORY_LIMIT_PROPORTIONS: Record<string, number> = {
 };
 
 const CATEGORY_ICONS: Record<string, { icon: React.ReactNode; bg: string; color: string }> = {
-  Food: { icon: <Utensils size={20} color="#f97316" />, bg: "#ffedd5", color: "#f97316" },
-  Transport: { icon: <Train size={20} color="#ef4444" />, bg: "#fee2e2", color: "#ef4444" },
-  Shopping: { icon: <ShoppingBag size={20} color="#39baa6" />, bg: "#e6fcf5", color: "#39baa6" },
-  Activities: { icon: <Camera size={20} color="#007dfe" />, bg: "#dbeafe", color: "#007dfe" },
+  Food: { icon: <Utensils size={20} color={getCategoryColor("Food").color} />, bg: getCategoryColor("Food").bg, color: getCategoryColor("Food").color },
+  Transport: { icon: <Train size={20} color={getCategoryColor("Transport").color} />, bg: getCategoryColor("Transport").bg, color: getCategoryColor("Transport").color },
+  Shopping: { icon: <ShoppingBag size={20} color={getCategoryColor("Shopping").color} />, bg: getCategoryColor("Shopping").bg, color: getCategoryColor("Shopping").color },
+  Activities: { icon: <Camera size={20} color={getCategoryColor("Activities").color} />, bg: getCategoryColor("Activities").bg, color: getCategoryColor("Activities").color },
 };
 
 function getIconConfig(category: string) {
@@ -67,6 +69,8 @@ export default function BudgetScreen() {
   const [durationInputText, setDurationInputText] = useState("");
   const [isDurationFocused, setIsDurationFocused] = useState(false);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -154,6 +158,20 @@ export default function BudgetScreen() {
     setDurationInputText(clean);
   };
 
+  const handleResetTransactions = async () => {
+    if (!trip) return;
+    try {
+      setResetting(true);
+      await deleteAllExpensesForTrip(trip.id);
+      setExpenses([]);
+      setShowResetDialog(false);
+    } catch (err) {
+      console.error("Failed to reset transactions:", err);
+    } finally {
+      setResetting(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <StatusBar style="dark" />
@@ -165,188 +183,200 @@ export default function BudgetScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#006b5e" />
-        </View>
-      ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Skyline Accent / Visual Depth Card */}
-          <View style={styles.skylineCard}>
-            <View style={styles.skylineOverlay}>
-              <View style={styles.skylineHeader}>
-                <View>
-                  <Text style={styles.skylineLabel}>CURRENT TRIP</Text>
-                  <Text style={styles.skylineTitle}>{trip?.name ?? "Trip Budget"}</Text>
-                </View>
-                <View style={styles.daysBadge}>
-                  <Calendar size={12} color="#fff" />
-                  <Text style={styles.daysBadgeText}>{durationDays} Days</Text>
-                </View>
-              </View>
-              <View style={styles.skylineFooter}>
-                <View>
-                  <Text style={styles.skylineLabel}>DAILY STATUS</Text>
-                  <Text style={styles.skylineStatusText}>
-                    {isUnderBudget ? "Under Budget" : "Over Budget"}
-                  </Text>
-                </View>
-                <ShieldCheck size={32} color="#fff" style={styles.pulseIcon} />
-              </View>
-            </View>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#006b5e" />
           </View>
-
-          {/* Budget Summary Card */}
-          <BudgetCard
-            budgetPhp={budgetPhp}
-            spentPhp={totalSpent}
-            remainingPhp={remainingPhp}
-            spentPercent={spentPercent}
-            currency={currencyPreference}
-            exchangeRate={trip?.exchange_rate || 6.5}
-          />
-
-          {/* Daily Limit Grid */}
-          <View style={styles.gridRow}>
-            <View style={styles.gridCard}>
-              <Text style={styles.gridLabel}>Daily Limit</Text>
-              <Text style={styles.gridVal}>{currencySymbol} {Math.round(displayDailyLimit).toLocaleString()}</Text>
-            </View>
-            <View style={styles.gridCard}>
-              <Text style={styles.gridLabel}>Avg. Daily Spend</Text>
-              <Text style={[styles.gridVal, { color: "#007dfe" }]}>
-                {currencySymbol} {Math.round(displayAvgDailySpend).toLocaleString()}
-              </Text>
-            </View>
-          </View>
-
-          {/* Category Budgets */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Category Budgets</Text>
-            <Pressable>
-              <Text style={styles.resetBtn}>RESET</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.categoriesList}>
-            {Object.keys(CATEGORY_LIMIT_PROPORTIONS).map((catKey) => {
-              const proportion = CATEGORY_LIMIT_PROPORTIONS[catKey];
-              const limit = budgetPhp * proportion;
-              const spent = categorySpent[catKey] || 0;
-              const percent = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
-              const { icon, bg, color } = getIconConfig(catKey);
-
-              const displayLimit = currencyPreference === "HKD" && trip ? limit / trip.exchange_rate : limit;
-              const displaySpentCat = currencyPreference === "HKD" && trip ? spent / trip.exchange_rate : spent;
-
-              return (
-                <View key={catKey} style={styles.categoryCard}>
-                  <View style={[styles.categoryIconBox, { backgroundColor: bg }]}>
-                    {icon}
+        ) : (
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {/* Skyline Accent / Visual Depth Card */}
+            <View style={styles.skylineCard}>
+              <View style={styles.skylineOverlay}>
+                <View style={styles.skylineHeader}>
+                  <View>
+                    <Text style={styles.skylineLabel}>CURRENT TRIP</Text>
+                    <Text style={styles.skylineTitle}>{trip?.name ?? "Trip Budget"}</Text>
                   </View>
-                  <View style={styles.categoryInfo}>
-                    <View style={styles.categoryHeader}>
-                      <Text style={styles.categoryName}>{catKey}</Text>
-                      <Text style={styles.categorySpendText}>
-                        {currencySymbol} {Math.round(displaySpentCat).toLocaleString()} / {Math.round(displayLimit).toLocaleString()}
-                      </Text>
+                  <View style={styles.daysBadge}>
+                    <Calendar size={12} color="#fff" />
+                    <Text style={styles.daysBadgeText}>{durationDays} Days</Text>
+                  </View>
+                </View>
+                <View style={styles.skylineFooter}>
+                  <View>
+                    <Text style={styles.skylineLabel}>DAILY STATUS</Text>
+                    <Text style={styles.skylineStatusText}>
+                      {isUnderBudget ? "Under Budget" : "Over Budget"}
+                    </Text>
+                  </View>
+                  <ShieldCheck size={32} color="#fff" style={styles.pulseIcon} />
+                </View>
+              </View>
+            </View>
+
+            {/* Budget Summary Card */}
+            <BudgetCard
+              budgetPhp={budgetPhp}
+              spentPhp={totalSpent}
+              remainingPhp={remainingPhp}
+              spentPercent={spentPercent}
+              currency={currencyPreference}
+              exchangeRate={trip?.exchange_rate || 6.5}
+            />
+
+            {/* Daily Limit Grid */}
+            <View style={styles.gridRow}>
+              <View style={styles.gridCard}>
+                <Text style={styles.gridLabel}>Daily Limit</Text>
+                <Text style={styles.gridVal}>{currencySymbol} {Math.round(displayDailyLimit).toLocaleString()}</Text>
+              </View>
+              <View style={styles.gridCard}>
+                <Text style={styles.gridLabel}>Avg. Daily Spend</Text>
+                <Text style={[styles.gridVal, { color: "#007dfe" }]}>
+                  {currencySymbol} {Math.round(displayAvgDailySpend).toLocaleString()}
+                </Text>
+              </View>
+            </View>
+
+            {/* Category Budgets */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Category Budgets</Text>
+            </View>
+
+            <View style={styles.categoriesList}>
+              {Object.keys(CATEGORY_LIMIT_PROPORTIONS).map((catKey) => {
+                const proportion = CATEGORY_LIMIT_PROPORTIONS[catKey];
+                const limit = budgetPhp * proportion;
+                const spent = categorySpent[catKey] || 0;
+                const percent = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
+                const { icon, bg, color } = getIconConfig(catKey);
+
+                const displayLimit = currencyPreference === "HKD" && trip ? limit / trip.exchange_rate : limit;
+                const displaySpentCat = currencyPreference === "HKD" && trip ? spent / trip.exchange_rate : spent;
+
+                return (
+                  <View key={catKey} style={styles.categoryCard}>
+                    <View style={[styles.categoryIconBox, { backgroundColor: bg }]}>
+                      {icon}
                     </View>
-                    <View style={styles.progressBg}>
-                      <View
-                        style={[
-                          styles.progressFill,
-                          { width: `${percent}%` as any, backgroundColor: color || "#39baa6" },
-                        ]}
-                      />
+                    <View style={styles.categoryInfo}>
+                      <View style={styles.categoryHeader}>
+                        <Text style={styles.categoryName}>{catKey}</Text>
+                        <Text style={styles.categorySpendText}>
+                          {currencySymbol} {Math.round(displaySpentCat).toLocaleString()} / {Math.round(displayLimit).toLocaleString()}
+                        </Text>
+                      </View>
+                      <View style={styles.progressBg}>
+                        <View
+                          style={[
+                            styles.progressFill,
+                            { width: `${percent}%` as any, backgroundColor: color || "#39baa6" },
+                          ]}
+                        />
+                      </View>
                     </View>
                   </View>
-                </View>
-              );
-            })}
-          </View>
-
-          {/* Setup preferences section */}
-          <View style={styles.setupCard}>
-            <View style={styles.setupHeader}>
-              <Settings size={20} color="#39baa6" />
-              <Text style={styles.setupTitle}>Setup Preferences</Text>
+                );
+              })}
             </View>
 
-            <View style={styles.setupBody}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>TOTAL TRIP BUDGET (PHP)</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.inputText}
-                    value={getFormattedBudget()}
-                    keyboardType="numeric"
-                    onChangeText={handleBudgetChange}
-                    onFocus={() => setIsBudgetFocused(true)}
-                    onBlur={() => setIsBudgetFocused(false)}
-                    placeholder="30,000"
-                    placeholderTextColor="#a1a1a1"
-                  />
-                  <Wallet size={18} color="#717786" />
-                </View>
+            {/* Setup preferences section */}
+            <View style={styles.setupCard}>
+              <View style={styles.setupHeader}>
+                <Settings size={20} color="#39baa6" />
+                <Text style={styles.setupTitle}>Setup Preferences</Text>
               </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>TRIP DURATION</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.inputText}
-                    value={isDurationFocused ? durationInputText : getDurationText(trip?.created_at, Number(durationInputText) || 7)}
-                    keyboardType="number-pad"
-                    onChangeText={handleDurationChange}
-                    onFocus={() => setIsDurationFocused(true)}
-                    onBlur={() => setIsDurationFocused(false)}
-                    placeholder="7"
-                    placeholderTextColor="#a1a1a1"
-                  />
-                  <Calendar size={18} color="#717786" />
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>CURRENCY PREFERENCE</Text>
-                <Pressable style={styles.inputWrapper} onPress={() => setShowCurrencyDropdown(!showCurrencyDropdown)}>
-                  <Text style={styles.dropdownValueText}>
-                    {currencyPreference === "HKD" ? "Hong Kong Dollar (HKD)" : "Philippine Peso (PHP)"}
-                  </Text>
-                  <ChevronDown size={18} color="#717786" />
-                </Pressable>
-                {showCurrencyDropdown && (
-                  <View style={styles.dropdownMenu}>
-                    <Pressable
-                      style={styles.dropdownItem}
-                      onPress={() => {
-                        setCurrencyPreference("PHP");
-                        setShowCurrencyDropdown(false);
-                      }}
-                    >
-                      <Text style={styles.dropdownItemText}>Philippine Peso (PHP)</Text>
-                    </Pressable>
-                    <Pressable
-                      style={styles.dropdownItem}
-                      onPress={() => {
-                        setCurrencyPreference("HKD");
-                        setShowCurrencyDropdown(false);
-                      }}
-                    >
-                      <Text style={styles.dropdownItemText}>Hong Kong Dollar (HKD)</Text>
-                    </Pressable>
+              <View style={styles.setupBody}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>TOTAL TRIP BUDGET (PHP)</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.inputText}
+                      value={getFormattedBudget()}
+                      keyboardType="numeric"
+                      onChangeText={handleBudgetChange}
+                      onFocus={() => setIsBudgetFocused(true)}
+                      onBlur={() => setIsBudgetFocused(false)}
+                      placeholder="30,000"
+                      placeholderTextColor="#a1a1a1"
+                    />
+                    <Wallet size={18} color="#717786" />
                   </View>
-                )}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>TRIP DURATION</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.inputText}
+                      value={isDurationFocused ? durationInputText : getDurationText(trip?.created_at, Number(durationInputText) || 7)}
+                      keyboardType="number-pad"
+                      onChangeText={handleDurationChange}
+                      onFocus={() => setIsDurationFocused(true)}
+                      onBlur={() => setIsDurationFocused(false)}
+                      placeholder="7"
+                      placeholderTextColor="#a1a1a1"
+                    />
+                    <Calendar size={18} color="#717786" />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>CURRENCY PREFERENCE</Text>
+                  <Pressable style={styles.inputWrapper} onPress={() => setShowCurrencyDropdown(!showCurrencyDropdown)}>
+                    <Text style={styles.dropdownValueText}>
+                      {currencyPreference === "HKD" ? "Hong Kong Dollar (HKD)" : "Philippine Peso (PHP)"}
+                    </Text>
+                    <ChevronDown size={18} color="#717786" />
+                  </Pressable>
+                  {showCurrencyDropdown && (
+                    <View style={styles.dropdownMenu}>
+                      <Pressable
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setCurrencyPreference("PHP");
+                          setShowCurrencyDropdown(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownItemText}>Philippine Peso (PHP)</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setCurrencyPreference("HKD");
+                          setShowCurrencyDropdown(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownItemText}>Hong Kong Dollar (HKD)</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
               </View>
+
+              <Pressable style={styles.saveBtn} onPress={handleSaveChanges}>
+                <Text style={styles.saveBtnText}>Save Changes</Text>
+              </Pressable>
             </View>
 
-            <Pressable style={styles.saveBtn} onPress={handleSaveChanges}>
-              <Text style={styles.saveBtnText}>Save Changes</Text>
+            <Pressable style={styles.resetBottomBtn} onPress={() => setShowResetDialog(true)}>
+              <Text style={styles.resetBottomText}>Reset</Text>
             </Pressable>
-          </View>
-        </ScrollView>
-      )}
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
+
+      <ResetTransactionsDialog
+        visible={showResetDialog}
+        title="Reset transactions?"
+        message="This will permanently delete all transactions for this trip. This cannot be undone."
+        onCancel={() => {
+          if (!resetting) setShowResetDialog(false);
+        }}
+        onConfirm={handleResetTransactions}
+        busy={resetting}
+      />
 
       {/* Bottom Nav */}
       <BottomNav activeTab="budget" />
@@ -488,11 +518,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#0b1c30",
   },
-  resetBtn: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#39baa6",
-  },
   categoriesList: {
     gap: 12,
     marginBottom: 20,
@@ -625,6 +650,19 @@ const styles = StyleSheet.create({
   saveBtnText: {
     fontSize: 14,
     fontWeight: "700",
+    color: "#fff",
+  },
+  resetBottomBtn: {
+    marginTop: 20,
+    backgroundColor: "#ef4444",
+    height: 48,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  resetBottomText: {
+    fontSize: 15,
+    fontWeight: "800",
     color: "#fff",
   },
 });

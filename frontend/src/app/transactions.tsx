@@ -4,10 +4,12 @@ import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect, useRef } from "react";
 import { Stack, router } from "expo-router";
 import { consumeFromDashboard } from "../lib/navigationFlag";
-import { Menu, Bell, Search, Utensils, Train, ShoppingBag, Camera, HelpCircle } from "lucide-react-native";
-import { getAllTrips, getExpensesForTrip } from "../db/queries";
+import { Menu, Bell, Search, Utensils, Train, ShoppingBag, Camera, HelpCircle, Trash2 } from "lucide-react-native";
+import { deleteExpense, getAllTrips, getExpensesForTrip } from "../db/queries";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
+import DeleteTransactionDialog from "../components/DeleteTransactionDialog";
+import { getCategoryColor } from "../lib/categoryColors";
 
 type Expense = {
   id: string;
@@ -21,10 +23,10 @@ type Expense = {
 const CATEGORIES = ["All", "Food", "Transport", "Shopping", "Activities"];
 
 const CATEGORY_ICONS: Record<string, { icon: React.ReactNode; bg: string }> = {
-  Food: { icon: <Utensils size={20} color="#f97316" />, bg: "#ffedd5" },
-  Transport: { icon: <Train size={20} color="#ef4444" />, bg: "#fee2e2" },
-  Shopping: { icon: <ShoppingBag size={20} color="#a855f7" />, bg: "#f3e8ff" },
-  Activities: { icon: <Camera size={20} color="#007dfe" />, bg: "#dbeafe" },
+  Food: { icon: <Utensils size={20} color={getCategoryColor("Food").color} />, bg: getCategoryColor("Food").bg },
+  Transport: { icon: <Train size={20} color={getCategoryColor("Transport").color} />, bg: getCategoryColor("Transport").bg },
+  Shopping: { icon: <ShoppingBag size={20} color={getCategoryColor("Shopping").color} />, bg: getCategoryColor("Shopping").bg },
+  Activities: { icon: <Camera size={20} color={getCategoryColor("Activities").color} />, bg: getCategoryColor("Activities").bg },
 };
 
 function getIconConfig(category: string) {
@@ -41,7 +43,25 @@ export default function TransactionsScreen() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const scrollRef = useRef<ScrollView | null>(null);
+
+  const handleDeleteExpense = (expense: Expense) => setDeleteTarget(expense);
+
+  const confirmDeleteExpense = async () => {
+    if (!deleteTarget) return;
+    try {
+      setDeleteBusy(true);
+      await deleteExpense(deleteTarget.id);
+      setExpenses((current) => current.filter((item) => item.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error("Failed to delete expense:", err);
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
 
   useEffect(() => {
     async function loadExpenses() {
@@ -140,10 +160,23 @@ export default function TransactionsScreen() {
               return (
                 <Pressable
                   key={cat}
-                  style={[styles.filterChip, isActive && styles.filterChipActive]}
+                  style={[
+                    styles.filterChip,
+                    isActive && cat !== "All" && {
+                      backgroundColor: `${getCategoryColor(cat).color}15`,
+                      borderColor: getCategoryColor(cat).color,
+                    },
+                    isActive && cat === "All" && styles.filterChipActive,
+                  ]}
                   onPress={() => setSelectedCategory(cat)}
                 >
-                  <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      isActive && cat !== "All" && { color: getCategoryColor(cat).color },
+                      isActive && cat === "All" && styles.filterChipTextActive,
+                    ]}
+                  >
                     {cat}
                   </Text>
                 </Pressable>
@@ -182,9 +215,19 @@ export default function TransactionsScreen() {
                             </Text>
                           </View>
                         </View>
-                        <Text style={styles.transAmount}>
-                          -PHP {item.php_amount.toLocaleString("en-PH")}
-                        </Text>
+                        <View style={styles.amountActions}>
+                          <Text style={styles.transAmount}>
+                            -PHP {item.php_amount.toLocaleString("en-PH")}
+                          </Text>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Delete ${item.note || item.category}`}
+                            onPress={() => handleDeleteExpense(item)}
+                            style={styles.deleteButton}
+                          >
+                            <Trash2 size={16} color="#ef4444" />
+                          </Pressable>
+                        </View>
                       </View>
                     );
                   })}
@@ -195,6 +238,17 @@ export default function TransactionsScreen() {
         </ScrollView>
       )}
       </KeyboardAvoidingView>
+
+      <DeleteTransactionDialog
+        visible={deleteTarget !== null}
+        title="Delete transaction?"
+        message={`This will permanently remove ${deleteTarget?.note || deleteTarget?.category || "this item"} from your transaction history.`}
+        onCancel={() => {
+          if (!deleteBusy) setDeleteTarget(null);
+        }}
+        onConfirm={confirmDeleteExpense}
+        busy={deleteBusy}
+      />
 
       {/* Bottom Nav */}
       <BottomNav activeTab="transactions" />
@@ -268,6 +322,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     backgroundColor: "#d3e4fe",
+    borderWidth: 1,
+    borderColor: "transparent",
   },
   filterChipActive: {
     backgroundColor: "#006b5e",
@@ -340,6 +396,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#0b1c30",
+  },
+  amountActions: {
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  deleteButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
   },
   emptyState: {
     paddingVertical: 40,

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Utensils, Train, ShoppingBag, Ticket } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
 import { router } from "expo-router";
+import { getCategoryColor } from "../lib/categoryColors";
 
 type CategoryTotals = { [category: string]: number };
 
@@ -22,26 +23,26 @@ const CATEGORIES: CategoryConfig[] = [
   {
     key: "Food",
     label: "Food",
-    icon: <Utensils size={18} color="#007dfe" />,
-    color: "#007dfe",
+    icon: <Utensils size={18} color={getCategoryColor("Food").color} />,
+    color: getCategoryColor("Food").color,
   },
   {
     key: "Transport",
     label: "Transport",
-    icon: <Train size={18} color="#39baa6" />,
-    color: "#39baa6",
+    icon: <Train size={18} color={getCategoryColor("Transport").color} />,
+    color: getCategoryColor("Transport").color,
   },
   {
     key: "Shopping",
     label: "Shopping",
-    icon: <ShoppingBag size={18} color="#f97316" />,
-    color: "#f97316",
+    icon: <ShoppingBag size={18} color={getCategoryColor("Shopping").color} />,
+    color: getCategoryColor("Shopping").color,
   },
   {
     key: "Activities",
     label: "Activities",
-    icon: <Ticket size={18} color="#a855f7" />,
-    color: "#a855f7",
+    icon: <Ticket size={18} color={getCategoryColor("Activities").color} />,
+    color: getCategoryColor("Activities").color,
   },
 ];
 
