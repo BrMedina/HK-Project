@@ -1,8 +1,33 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { Train, Utensils, ShoppingBag, Camera } from "lucide-react-native";
+import { Train, Utensils, ShoppingBag, Camera, Ticket, HelpCircle } from "lucide-react-native";
+import { Expense } from "../db/useDashboard";
 
-export default function RecentTransactions() {
+type Props = {
+  expenses: Expense[];
+};
+
+const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; bg: string }> = {
+  Food: { icon: <Utensils size={20} color="#f97316" />, bg: "#ffedd5" },
+  Transport: { icon: <Train size={20} color="#ef4444" />, bg: "#fee2e2" },
+  Shopping: { icon: <ShoppingBag size={20} color="#a855f7" />, bg: "#f3e8ff" },
+  Activities: { icon: <Camera size={20} color="#007dfe" />, bg: "#dbeafe" },
+  Entertainment: { icon: <Ticket size={20} color="#39baa6" />, bg: "#d1fae5" },
+};
+
+function getIconConfig(category: string) {
+  return CATEGORY_CONFIG[category] ?? { icon: <HelpCircle size={20} color="#717786" />, bg: "#ebedf8" };
+}
+
+function formatDate(timestamp: number | null): string {
+  if (!timestamp) return "";
+  const d = new Date(timestamp);
+  return d.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+}
+
+export default function RecentTransactions({ expenses }: Props) {
+  const recent = expenses.slice(0, 5);
+
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
@@ -13,53 +38,35 @@ export default function RecentTransactions() {
       </View>
 
       <View style={styles.transactionsList}>
-        {/* MTR */}
-        <View style={styles.transactionItem}>
-          <View style={[styles.transIconContainer, { backgroundColor: "#fee2e2" }]}>
-            <Train size={20} color="#ef4444" />
+        {recent.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No transactions yet.</Text>
+            <Text style={styles.emptySubText}>Tap the scan button to add your first expense.</Text>
           </View>
-          <View style={styles.transDetails}>
-            <Text style={styles.transTitle}>MTR Octopus Card Top-up</Text>
-            <Text style={styles.transSub}>May 20, 2024 • Transport</Text>
-          </View>
-          <Text style={styles.transAmount}>-PHP 150</Text>
-        </View>
-
-        {/* DimDimSum */}
-        <View style={styles.transactionItem}>
-          <View style={[styles.transIconContainer, { backgroundColor: "#ffedd5" }]}>
-            <Utensils size={20} color="#f97316" />
-          </View>
-          <View style={styles.transDetails}>
-            <Text style={styles.transTitle}>DimDimSum (Tsim Sha Tsui)</Text>
-            <Text style={styles.transSub}>May 20, 2024 • Food</Text>
-          </View>
-          <Text style={styles.transAmount}>-PHP 320</Text>
-        </View>
-
-        {/* Miniso */}
-        <View style={styles.transactionItem}>
-          <View style={[styles.transIconContainer, { backgroundColor: "#f3e8ff" }]}>
-            <ShoppingBag size={20} color="#a855f7" />
-          </View>
-          <View style={styles.transDetails}>
-            <Text style={styles.transTitle}>Miniso (Nathan Road)</Text>
-            <Text style={styles.transSub}>May 19, 2024 • Shopping</Text>
-          </View>
-          <Text style={styles.transAmount}>-PHP 450</Text>
-        </View>
-
-        {/* The Peak Tram */}
-        <View style={styles.transactionItem}>
-          <View style={[styles.transIconContainer, { backgroundColor: "#dbeafe" }]}>
-            <Camera size={20} color="#007dfe" />
-          </View>
-          <View style={styles.transDetails}>
-            <Text style={styles.transTitle}>The Peak Tram</Text>
-            <Text style={styles.transSub}>May 19, 2024 • Activities</Text>
-          </View>
-          <Text style={styles.transAmount}>-PHP 180</Text>
-        </View>
+        ) : (
+          recent.map((expense, index) => {
+            const { icon, bg } = getIconConfig(expense.category);
+            const isLast = index === recent.length - 1;
+            return (
+              <View key={expense.id} style={[styles.transactionItem, isLast && styles.transactionItemLast]}>
+                <View style={[styles.transIconContainer, { backgroundColor: bg }]}>
+                  {icon}
+                </View>
+                <View style={styles.transDetails}>
+                  <Text style={styles.transTitle} numberOfLines={1}>
+                    {expense.note || expense.category}
+                  </Text>
+                  <Text style={styles.transSub}>
+                    {formatDate(expense.date)} • {expense.category}
+                  </Text>
+                </View>
+                <Text style={styles.transAmount}>
+                  -PHP {expense.php_amount.toLocaleString("en-PH")}
+                </Text>
+              </View>
+            );
+          })
+        )}
       </View>
     </View>
   );
@@ -100,6 +107,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f1f3fe",
   },
+  transactionItemLast: {
+    borderBottomWidth: 0,
+  },
   transIconContainer: {
     width: 40,
     height: 40,
@@ -125,5 +135,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: "#181c23",
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 24,
+    gap: 6,
+  },
+  emptyText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#181c23",
+  },
+  emptySubText: {
+    fontSize: 12,
+    color: "#717786",
+    textAlign: "center",
   },
 });

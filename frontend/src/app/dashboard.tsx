@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, ScrollView, View } from "react-native";
+import { StyleSheet, ScrollView, View, ActivityIndicator, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Stack } from "expo-router";
@@ -10,22 +10,49 @@ import BudgetCard from "../components/BudgetCard";
 import QuickOverview from "../components/QuickOverview";
 import RecentTransactions from "../components/RecentTransactions";
 import BottomNav from "../components/BottomNav";
+import { useDashboard } from "../db/useDashboard";
 
 export default function Dashboard() {
+  const {
+    trip,
+    expenses,
+    totalSpent,
+    categoryTotals,
+    budgetPhp,
+    remainingPhp,
+    spentPercent,
+    loading,
+  } = useDashboard();
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Header />
+      <Header tripName={trip?.name ?? "My Trip"} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <WelcomeHero />
-        <BudgetCard />
-        <QuickOverview />
-        <RecentTransactions />
-        <View style={styles.spacer} />
-      </ScrollView>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#39baa6" />
+          <Text style={styles.loadingText}>Loading your trip...</Text>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <WelcomeHero />
+          <BudgetCard
+            budgetPhp={budgetPhp}
+            spentPhp={totalSpent}
+            remainingPhp={remainingPhp}
+            spentPercent={spentPercent}
+          />
+          <QuickOverview
+            categoryTotals={categoryTotals}
+            totalSpent={totalSpent}
+          />
+          <RecentTransactions expenses={expenses} />
+          <View style={styles.spacer} />
+        </ScrollView>
+      )}
 
       <BottomNav />
     </SafeAreaView>
@@ -44,5 +71,16 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: "#717786",
+    fontWeight: "500",
   },
 });

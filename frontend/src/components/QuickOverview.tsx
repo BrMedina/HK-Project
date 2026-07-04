@@ -1,18 +1,78 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Utensils, Train, ShoppingBag, Ticket } from "lucide-react-native";
+import Svg, { Circle } from "react-native-svg";
 
-export default function QuickOverview() {
+type CategoryTotals = { [category: string]: number };
+
+type Props = {
+  categoryTotals: CategoryTotals;
+  totalSpent: number;
+};
+
+type CategoryConfig = {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+};
+
+const CATEGORIES: CategoryConfig[] = [
+  {
+    key: "Food",
+    label: "Food",
+    icon: <Utensils size={18} color="#007dfe" />,
+    color: "#007dfe",
+  },
+  {
+    key: "Transport",
+    label: "Transport",
+    icon: <Train size={18} color="#39baa6" />,
+    color: "#39baa6",
+  },
+  {
+    key: "Shopping",
+    label: "Shopping",
+    icon: <ShoppingBag size={18} color="#f97316" />,
+    color: "#f97316",
+  },
+  {
+    key: "Activities",
+    label: "Activities",
+    icon: <Ticket size={18} color="#a855f7" />,
+    color: "#a855f7",
+  },
+];
+
+export default function QuickOverview({ categoryTotals, totalSpent }: Props) {
+  const [activeView, setActiveView] = useState<"Circle" | "Card">("Circle");
+
+  const getPercent = (catKey: string) => {
+    if (totalSpent === 0) return 0;
+    return Math.round(((categoryTotals[catKey] || 0) / totalSpent) * 100);
+  };
+
+  const size = 52;
+  const strokeWidth = 5;
+  const radius = (size - strokeWidth) / 2; // 23.5
+  const circumference = 2 * Math.PI * radius; // ~147.65
+
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Quick Overview</Text>
         <View style={styles.toggleContainer}>
-          <Pressable style={[styles.toggleBtn, styles.toggleActive]}>
-            <Text style={styles.toggleActiveText}>Circle</Text>
+          <Pressable
+            style={[styles.toggleBtn, activeView === "Circle" && styles.toggleActive]}
+            onPress={() => setActiveView("Circle")}
+          >
+            <Text style={activeView === "Circle" ? styles.toggleActiveText : styles.toggleInactiveText}>Circle</Text>
           </Pressable>
-          <Pressable style={styles.toggleBtn}>
-            <Text style={styles.toggleInactiveText}>Card</Text>
+          <Pressable
+            style={[styles.toggleBtn, activeView === "Card" && styles.toggleActive]}
+            onPress={() => setActiveView("Card")}
+          >
+            <Text style={activeView === "Card" ? styles.toggleActiveText : styles.toggleInactiveText}>Card</Text>
           </Pressable>
         </View>
         <Pressable>
@@ -21,41 +81,57 @@ export default function QuickOverview() {
       </View>
 
       <View style={styles.categoryRow}>
-        {/* Food */}
-        <View style={styles.categoryItem}>
-          <View style={[styles.categoryCircle, { borderColor: "#007dfe", borderTopColor: "#ebedf8" }]}>
-            <Utensils size={18} color="#007dfe" />
-          </View>
-          <Text style={styles.categoryLabel}>Food</Text>
-          <Text style={[styles.categoryPercent, { color: "#007dfe" }]}>34%</Text>
-        </View>
+        {CATEGORIES.map((cat) => {
+          const pct = getPercent(cat.key);
+          const progress = pct / 100;
+          const strokeDashoffset = circumference - progress * circumference;
 
-        {/* Transport */}
-        <View style={styles.categoryItem}>
-          <View style={[styles.categoryCircle, { borderColor: "#39baa6", borderTopColor: "#ebedf8", borderRightColor: "#ebedf8" }]}>
-            <Train size={18} color="#39baa6" />
-          </View>
-          <Text style={styles.categoryLabel}>Transport</Text>
-          <Text style={[styles.categoryPercent, { color: "#39baa6" }]}>17%</Text>
-        </View>
-
-        {/* Shopping */}
-        <View style={styles.categoryItem}>
-          <View style={[styles.categoryCircle, { borderColor: "#f97316", borderTopColor: "#ebedf8" }]}>
-            <ShoppingBag size={18} color="#f97316" />
-          </View>
-          <Text style={styles.categoryLabel}>Shopping</Text>
-          <Text style={[styles.categoryPercent, { color: "#f97316" }]}>29%</Text>
-        </View>
-
-        {/* Activities */}
-        <View style={styles.categoryItem}>
-          <View style={[styles.categoryCircle, { borderColor: "#a855f7", borderTopColor: "#ebedf8", borderRightColor: "#ebedf8", borderLeftColor: "#ebedf8" }]}>
-            <Ticket size={18} color="#a855f7" />
-          </View>
-          <Text style={styles.categoryLabel}>Activities</Text>
-          <Text style={[styles.categoryPercent, { color: "#a855f7" }]}>14%</Text>
-        </View>
+          return (
+            <View key={cat.key} style={styles.categoryItem}>
+              {activeView === "Circle" ? (
+                <View style={styles.categoryCircleContainer}>
+                  <Svg width={size} height={size} style={styles.svg}>
+                    {/* Background Circle */}
+                    <Circle
+                      cx={size / 2}
+                      cy={size / 2}
+                      r={radius}
+                      stroke="#ebedf8"
+                      strokeWidth={strokeWidth}
+                      fill="transparent"
+                    />
+                    {/* Progress Circle */}
+                    <Circle
+                      cx={size / 2}
+                      cy={size / 2}
+                      r={radius}
+                      stroke={cat.color}
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      fill="transparent"
+                      origin={`${size / 2}, ${size / 2}`}
+                      rotation="-90"
+                    />
+                  </Svg>
+                  <View style={styles.iconWrapper}>
+                    {cat.icon}
+                  </View>
+                </View>
+              ) : (
+                /* Card View Alternative */
+                <View style={[styles.categoryCard, { backgroundColor: `${cat.color}15` }]}>
+                  {cat.icon}
+                </View>
+              )}
+              <Text style={styles.categoryLabel}>{cat.label}</Text>
+              <Text style={[styles.categoryPercent, { color: cat.color }]}>
+                {pct}%
+              </Text>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
@@ -120,14 +196,27 @@ const styles = StyleSheet.create({
     gap: 6,
     flex: 1,
   },
-  categoryCircle: {
+  categoryCircleContainer: {
     width: 52,
     height: 52,
-    borderRadius: 26,
-    borderWidth: 5,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    position: "relative",
+  },
+  svg: {
+    position: "absolute",
+  },
+  iconWrapper: {
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  categoryCard: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
   categoryLabel: {
     fontSize: 9,

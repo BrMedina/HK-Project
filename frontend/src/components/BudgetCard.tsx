@@ -1,37 +1,82 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 
-export default function BudgetCard() {
+type Props = {
+  budgetPhp: number;
+  spentPhp: number;
+  remainingPhp: number;
+  spentPercent: number;
+};
+
+function formatPhp(amount: number) {
+  return `PHP ${amount.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
+export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPercent }: Props) {
+  const fillWidth = `${Math.min(spentPercent, 100)}%` as `${number}%`;
+
+  // Circular Progress Calculation
+  const size = 64;
+  const strokeWidth = 6;
+  const radius = (size - strokeWidth) / 2; // (64 - 6) / 2 = 29
+  const circumference = 2 * Math.PI * radius; // ~182.2
+  const progress = Math.min(spentPercent, 100) / 100;
+  const strokeDashoffset = circumference - progress * circumference;
+
   return (
     <View style={styles.budgetCard}>
       <View style={styles.budgetTopRow}>
-        <View>
+        <View style={styles.budgetLeft}>
           <Text style={styles.budgetLabel}>Total Budget</Text>
-          <Text style={styles.budgetValue}>PHP 30,000</Text>
+          <Text style={styles.budgetValue}>{formatPhp(budgetPhp)}</Text>
         </View>
         <View style={styles.progressCircleContainer}>
-          <View style={styles.progressCircle}>
-            <Image
-              source={require("../../assets/galafund.png")}
-              style={styles.circleLogo}
-              resizeMode="contain"
+          <Svg width={size} height={size} style={styles.svg}>
+            {/* Background Circle */}
+            <Circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke="#ebedf8"
+              strokeWidth={strokeWidth}
+              fill="transparent"
             />
-          </View>
+            {/* Progress Circle */}
+            <Circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke="#39baa6"
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+              origin={`${size / 2}, ${size / 2}`}
+              rotation="-90"
+            />
+          </Svg>
+          <Image
+            source={require("../../assets/galafund.png")}
+            style={styles.circleLogo}
+            resizeMode="contain"
+          />
         </View>
       </View>
 
       <View style={styles.budgetBottom}>
         <View style={styles.spentInfo}>
           <Text style={styles.spentText}>
-            Spent <Text style={styles.spentAmount}>PHP 12,450</Text> • 41%
+            Spent <Text style={styles.spentAmount}>{formatPhp(spentPhp)}</Text> • {spentPercent}%
           </Text>
         </View>
         <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: "41%" }]} />
+          <View style={[styles.progressBarFill, { width: fillWidth }]} />
         </View>
         <View style={styles.remainingRow}>
           <Text style={styles.remainingLabel}>Remaining</Text>
-          <Text style={styles.remainingValue}>PHP 17,550</Text>
+          <Text style={styles.remainingValue}>{formatPhp(remainingPhp)}</Text>
         </View>
       </View>
     </View>
@@ -58,6 +103,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  budgetLeft: {
+    flex: 1,
+  },
   budgetLabel: {
     fontSize: 13,
     color: "#414754",
@@ -73,20 +121,15 @@ const styles = StyleSheet.create({
     height: 72,
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
   },
-  progressCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 6,
-    borderColor: "#39baa6",
-    borderTopColor: "#ebedf8",
-    justifyContent: "center",
-    alignItems: "center",
+  svg: {
+    position: "absolute",
   },
   circleLogo: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
+    position: "absolute",
   },
   budgetBottom: {
     gap: 10,
@@ -104,7 +147,7 @@ const styles = StyleSheet.create({
   },
   progressBarBg: {
     height: 8,
-    width: "100%",
+    alignSelf: "stretch" as const,
     backgroundColor: "#ebedf8",
     borderRadius: 4,
     overflow: "hidden",

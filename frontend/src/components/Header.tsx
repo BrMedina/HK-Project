@@ -2,7 +2,11 @@ import React from "react";
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import { ChevronDown, Bell, ArrowRight, Plane } from "lucide-react-native";
 
-export default function Header() {
+type Props = {
+  tripName?: string;
+};
+
+export default function Header({ tripName = "My Trip" }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.mainHeader}>
@@ -12,7 +16,7 @@ export default function Header() {
           resizeMode="contain"
         />
         <Pressable style={styles.tripSelector}>
-          <Text style={styles.tripTitle}>Hong Kong Trip</Text>
+          <Text style={styles.tripTitle}>{tripName}</Text>
           <ChevronDown size={18} color="#181c23" strokeWidth={2.5} />
         </Pressable>
         <Pressable style={styles.notificationButton}>
