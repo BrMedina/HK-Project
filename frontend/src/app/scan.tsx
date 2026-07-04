@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { Stack, router } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, QrCode, Receipt, Save, RefreshCw } from "lucide-react-native";
 
 import { getAllTrips, createTrip, addExpense } from "../db/queries";
@@ -23,6 +23,7 @@ import { getCategoryColor } from "../lib/categoryColors";
 const CATEGORIES = ["Food", "Transport", "Shopping", "Activities"];
 
 export default function ScanScreen() {
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
   const [activeTab, setActiveTab] = useState<"qr" | "ocr">("qr");
   const [tripId, setTripId] = useState<string | null>(null);
   const [loadingTrip, setLoadingTrip] = useState(true);
@@ -101,6 +102,12 @@ export default function ScanScreen() {
     setNoteInput("");
     setSelectedCategory("Food");
   };
+
+  useEffect(() => {
+    if (mode === "manual" && !loadingTrip) {
+      handleManualEntry();
+    }
+  }, [mode, loadingTrip]);
 
   const handleSave = async () => {
     if (!tripId || !amountInput) return;

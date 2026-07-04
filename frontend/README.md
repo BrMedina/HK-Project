@@ -54,3 +54,21 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Home screen widget
+
+- `src/widget/QuickAddWidget.jsx` — the widget's visual layout (today's spend,
+  budget left, an "Add expense" tap target). Pure presentation, no data fetching.
+- `src/widget/widget-task-handler.js` — runs when the widget is added, updated,
+  resized, or tapped. Pulls totals from the existing database (`src/db/queries`)
+  and the currency module (`src/api/currency.ts`), then either re-renders
+  the widget or opens the app via deep link.
+- Register a `galafund://add` deep link in the app's navigation so tapping the
+  widget lands directly on Add Expense, not the dashboard.
+- Android widgets can't reliably host a real text input, so the widget itself
+  is view-only plus one button — the actual typing still happens in the app,
+  just one tap away instead of several.
+- Requires native code: run `npx expo prebuild` then `npx expo run:android`.
+  Expo Go will not show the widget.
+- `getActiveTripId()` fetches the active trip (falls back to trips[0] or null).
+

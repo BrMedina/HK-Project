@@ -58,6 +58,18 @@ export async function getTotalSpentPHP(tripId) {
   return row?.total ?? 0;
 }
 
+export async function getTodaySpentPHP(tripId) {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const startTimestamp = startOfDay.getTime();
+  const row = await withDB((db) => db.getFirstAsync(
+    "SELECT COALESCE(SUM(php_amount), 0) as total FROM expenses WHERE trip_id = ? AND date >= ?",
+    [tripId, startTimestamp]
+  ));
+  return row?.total ?? 0;
+}
+
+
 export async function getTotalsByCategory(tripId) {
   const rows = await withDB((db) => db.getAllAsync(
     "SELECT category, SUM(php_amount) as total FROM expenses WHERE trip_id = ? GROUP BY category",
