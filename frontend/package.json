@@ -8,7 +8,7 @@
     "@expo/vector-icons": "^15.1.1",
     "@morrowdigital/watermelondb-expo-plugin": "^2.3.3",
     "@nozbe/watermelondb": "^0.28.0",
-    "@react-native-async-storage/async-storage": "^3.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.2",
     "expo-constants": "~57.0.3",
     "expo-device": "~57.0.0",

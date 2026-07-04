@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ScrollView, Pressable, ActivityIndicator, TextInput } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Pressable, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Stack, router } from "expo-router";
@@ -159,8 +159,12 @@ export default function BudgetScreen() {
       <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Header tripName={trip?.name ?? "Trip Budget"} />
+      <Header tripName={"Trip Budget"} />
 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#006b5e" />
@@ -173,7 +177,7 @@ export default function BudgetScreen() {
               <View style={styles.skylineHeader}>
                 <View>
                   <Text style={styles.skylineLabel}>CURRENT TRIP</Text>
-                  <Text style={styles.skylineTitle}>{trip?.name ?? "Hong Kong Trip"}</Text>
+                  <Text style={styles.skylineTitle}>{trip?.name ?? "Trip Budget"}</Text>
                 </View>
                 <View style={styles.daysBadge}>
                   <Calendar size={12} color="#fff" />
@@ -342,6 +346,7 @@ export default function BudgetScreen() {
           </View>
         </ScrollView>
       )}
+      </KeyboardAvoidingView>
 
       {/* Bottom Nav */}
       <BottomNav activeTab="budget" />

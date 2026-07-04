@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Utensils, Train, ShoppingBag, Ticket } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
+import { router } from "expo-router";
 
 type CategoryTotals = { [category: string]: number };
 
@@ -75,7 +76,7 @@ export default function QuickOverview({ categoryTotals, totalSpent }: Props) {
             <Text style={activeView === "Card" ? styles.toggleActiveText : styles.toggleInactiveText}>Card</Text>
           </Pressable>
         </View>
-        <Pressable>
+        <Pressable onPress={() => router.replace("/budget")}>
           <Text style={styles.seeAllText}>See All</Text>
         </Pressable>
       </View>

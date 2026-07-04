@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, ScrollView, Pressable, ActivityIndicator, ImageBackground } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Pressable, ActivityIndicator, ImageBackground, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Stack } from "expo-router";
@@ -35,67 +35,73 @@ export default function ConvertScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <Header tripName="Currency Converter" />
-      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
-        {/* Hero Header */}
-        <ImageBackground
-          source={require("../../assets/images/skyline.png")}
-          style={s.hero}
-          imageStyle={{ opacity: 0.1 }}
-          resizeMode="cover"
-        >
-          <View style={s.heroOverlay} />
-          <View style={{ position: "relative" }}>
-            <Text style={s.heroLabel}>CURRENT EXCHANGE FOCUS</Text>
-            <Text style={s.heroTitle}>{c.isSwapped ? "HKD to PHP" : "PHP to HKD"}</Text>
-            <View style={s.badge}>
-              <TrendingUp size={14} color="#007dfe" />
-              <Text style={s.badgeText}>Live Rate: 1 HKD = {c.rate} PHP</Text>
-            </View>
-          </View>
-        </ImageBackground>
 
-        {/* Quick Converter */}
-        <QuickConverter
-          isSwapped={c.isSwapped}
-          phpValue={c.phpValue}
-          hkdValue={c.hkdValue}
-          onPhpChange={c.handlePhpChange}
-          onHkdChange={c.handleHkdChange}
-          onSwap={c.handleSwap}
-        />
-
-        {/* Rate History */}
-        <View style={s.card}>
-          <View style={s.cardHeader}>
-            <Text style={s.cardTitle}>Rate Adjustments</Text>
-            <Pressable style={s.resetBtn} onPress={c.handleResetHistory}>
-              <RotateCcw size={12} color="#007dfe" />
-              <Text style={s.resetText}>Reset to Default</Text>
-            </Pressable>
-          </View>
-          {c.rateHistory.map((e, i) => (
-            <View key={e.id} style={[s.histRow, i < c.rateHistory.length - 1 && s.histBorder]}>
-              <View style={s.histLeft}>
-                <View style={[s.dot, { backgroundColor: e.isCurrent ? "#39baa6" : "#c1c6d7" }]} />
-                <Text style={s.histDate}>{e.date}</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
+          {/* Hero Header */}
+          <ImageBackground
+            source={require("../../assets/images/skyline.png")}
+            style={s.hero}
+            imageStyle={{ opacity: 0.1 }}
+            resizeMode="cover"
+          >
+            <View style={s.heroOverlay} />
+            <View style={{ position: "relative" }}>
+              <Text style={s.heroLabel}>CURRENT EXCHANGE FOCUS</Text>
+              <Text style={s.heroTitle}>{c.isSwapped ? "HKD to PHP" : "PHP to HKD"}</Text>
+              <View style={s.badge}>
+                <TrendingUp size={14} color="#007dfe" />
+                <Text style={s.badgeText}>Live Rate: 1 HKD = {c.rate} PHP</Text>
               </View>
-              <Text style={[s.histRate, !e.isCurrent && { color: "#717786" }]}>
-                1 HKD = {e.rate} PHP
-              </Text>
             </View>
-          ))}
-        </View>
+          </ImageBackground>
 
-        {/* Manual Rate Override */}
-        <ManualRateCard
-          customRateInput={c.customRateInput}
-          saving={c.saving}
-          onRateChange={c.handleCustomRateChange}
-          onSave={c.handleSaveRate}
-        />
+          {/* Quick Converter */}
+          <QuickConverter
+            isSwapped={c.isSwapped}
+            phpValue={c.phpValue}
+            hkdValue={c.hkdValue}
+            onPhpChange={c.handlePhpChange}
+            onHkdChange={c.handleHkdChange}
+            onSwap={c.handleSwap}
+          />
 
-        <View style={s.spacer} />
-      </ScrollView>
+          {/* Rate History */}
+          <View style={s.card}>
+            <View style={s.cardHeader}>
+              <Text style={s.cardTitle}>Rate Adjustments</Text>
+              <Pressable style={s.resetBtn} onPress={c.handleResetHistory}>
+                <RotateCcw size={12} color="#007dfe" />
+                <Text style={s.resetText}>Reset to Default</Text>
+              </Pressable>
+            </View>
+            {c.rateHistory.map((e, i) => (
+              <View key={e.id} style={[s.histRow, i < c.rateHistory.length - 1 && s.histBorder]}>
+                <View style={s.histLeft}>
+                  <View style={[s.dot, { backgroundColor: e.isCurrent ? "#39baa6" : "#c1c6d7" }]} />
+                  <Text style={s.histDate}>{e.date}</Text>
+                </View>
+                <Text style={[s.histRate, !e.isCurrent && { color: "#717786" }]}>
+                  1 HKD = {e.rate} PHP
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Manual Rate Override */}
+          <ManualRateCard
+            customRateInput={c.customRateInput}
+            saving={c.saving}
+            onRateChange={c.handleCustomRateChange}
+            onSave={c.handleSaveRate}
+          />
+
+          <View style={s.spacer} />
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <BottomNav activeTab="convert" />
     </SafeAreaView>

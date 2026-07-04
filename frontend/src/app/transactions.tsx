@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ScrollView, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import React, { useState, useEffect, useRef } from "react";
 import { Stack, router } from "expo-router";
+import { consumeFromDashboard } from "../lib/navigationFlag";
 import { Menu, Bell, Search, Utensils, Train, ShoppingBag, Camera, HelpCircle } from "lucide-react-native";
 import { getAllTrips, getExpensesForTrip } from "../db/queries";
 import BottomNav from "../components/BottomNav";
@@ -40,6 +41,7 @@ export default function TransactionsScreen() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const scrollRef = useRef<ScrollView | null>(null);
 
   useEffect(() => {
     async function loadExpenses() {
@@ -57,6 +59,12 @@ export default function TransactionsScreen() {
       }
     }
     loadExpenses();
+  }, []);
+
+  useEffect(() => {
+    if (consumeFromDashboard()) {
+      setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 50);
+    }
   }, []);
 
   // Filter logic
@@ -98,13 +106,17 @@ export default function TransactionsScreen() {
 
       <Header tripName="Transactions" />
 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
       {/* Main Content */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#006b5e" />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Search Bar */}
           <View style={styles.searchContainer}>
             <Search size={20} color="#717786" style={styles.searchIcon} />
@@ -182,6 +194,7 @@ export default function TransactionsScreen() {
           )}
         </ScrollView>
       )}
+      </KeyboardAvoidingView>
 
       {/* Bottom Nav */}
       <BottomNav activeTab="transactions" />

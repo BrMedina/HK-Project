@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { router } from "expo-router";
 import { Train, Utensils, ShoppingBag, Camera, Ticket, HelpCircle } from "lucide-react-native";
+import { router } from "expo-router";
 import { Expense } from "../db/useDashboard";
 
 type Props = {
@@ -35,7 +35,7 @@ export default function RecentTransactions({ expenses, currency = "PHP", exchang
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        <Pressable onPress={() => router.push("/transactions")}>
+        <Pressable onPress={() => router.replace("/transactions")}>
           <Text style={styles.seeAllText}>See All</Text>
         </Pressable>
       </View>
