@@ -73,7 +73,7 @@ export function QuickAddWidget({
             <FlexWidget
               style={{
                 height: 6,
-                backgroundColor: "#39baa6",
+                backgroundColor: spentPercent >= 80 ? "#ef4444" : "#39baa6",
                 borderRadius: 3,
                 flex: spentPercent,
               }}
@@ -103,7 +103,7 @@ export function QuickAddWidget({
         <TextWidget text="Remaining" style={{ fontSize: 12, color: "#717786" }} />
         <TextWidget
           text={`PHP ${Math.round(budgetLeftPHP).toLocaleString("en-PH")}`}
-          style={{ fontSize: 13, color: "#39baa6", fontWeight: "700" }}
+          style={{ fontSize: 13, color: spentPercent >= 80 ? "#ef4444" : "#39baa6", fontWeight: "700" }}
         />
       </FlexWidget>
 

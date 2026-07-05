@@ -68,7 +68,7 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
             {progress > 0 && (
               <Path
                 d={arcPath}
-                stroke="#39baa6"
+                stroke={spentPercent >= 80 ? "#ef4444" : "#39baa6"}
                 strokeWidth={strokeWidth}
                 fill="transparent"
                 strokeLinecap="round"
@@ -90,11 +90,11 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
           </Text>
         </View>
         <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: fillWidth }]} />
+          <View style={[styles.progressBarFill, { width: fillWidth }, spentPercent >= 80 && { backgroundColor: "#ef4444" }]} />
         </View>
         <View style={styles.remainingRow}>
           <Text style={styles.remainingLabel}>Remaining</Text>
-          <Text style={styles.remainingValue}>{formatCurrency(displayRemaining, currency)}</Text>
+          <Text style={[styles.remainingValue, spentPercent >= 80 && { color: "#ef4444" }]}>{formatCurrency(displayRemaining, currency)}</Text>
         </View>
       </View>
     </View>

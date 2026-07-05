@@ -1,33 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { Train, Utensils, ShoppingBag, Camera, Ticket, HelpCircle } from "lucide-react-native";
 import { router } from "expo-router";
-import { Expense } from "../db/useDashboard";
-import { getCategoryColor } from "../lib/categoryColors";
+import TransactionItem, { Expense } from "./TransactionItem";
 
 type Props = {
   expenses: Expense[];
   currency?: string;
   exchangeRate?: number;
 };
-
-const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; bg: string }> = {
-  Food: { icon: <Utensils size={20} color={getCategoryColor("Food").color} />, bg: getCategoryColor("Food").bg },
-  Transport: { icon: <Train size={20} color={getCategoryColor("Transport").color} />, bg: getCategoryColor("Transport").bg },
-  Shopping: { icon: <ShoppingBag size={20} color={getCategoryColor("Shopping").color} />, bg: getCategoryColor("Shopping").bg },
-  Activities: { icon: <Camera size={20} color={getCategoryColor("Activities").color} />, bg: getCategoryColor("Activities").bg },
-  Entertainment: { icon: <Ticket size={20} color="#39baa6" />, bg: "#d1fae5" },
-};
-
-function getIconConfig(category: string) {
-  return CATEGORY_CONFIG[category] ?? { icon: <HelpCircle size={20} color="#717786" />, bg: "#ebedf8" };
-}
-
-function formatDate(timestamp: number | null): string {
-  if (!timestamp) return "";
-  const d = new Date(timestamp);
-  return d.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
-}
 
 export default function RecentTransactions({ expenses, currency = "PHP", exchangeRate = 1 }: Props) {
   const recent = expenses.slice(0, 5);
@@ -48,29 +28,16 @@ export default function RecentTransactions({ expenses, currency = "PHP", exchang
             <Text style={styles.emptySubText}>Tap the scan button to add your first expense.</Text>
           </View>
         ) : (
-          recent.map((expense, index) => {
-            const { icon, bg } = getIconConfig(expense.category);
-            const isLast = index === recent.length - 1;
-            const displayAmount = currency === "HKD" && exchangeRate > 0 ? expense.php_amount / exchangeRate : expense.php_amount;
-            return (
-              <View key={expense.id} style={[styles.transactionItem, isLast && styles.transactionItemLast]}>
-                <View style={[styles.transIconContainer, { backgroundColor: bg }]}>
-                  {icon}
-                </View>
-                <View style={styles.transDetails}>
-                  <Text style={styles.transTitle} numberOfLines={1}>
-                    {expense.note || expense.category}
-                  </Text>
-                  <Text style={styles.transSub}>
-                    {formatDate(expense.date)} • {expense.category}
-                  </Text>
-                </View>
-                <Text style={styles.transAmount}>
-                  -{currency === "HKD" ? "HKD" : "PHP"} {displayAmount.toLocaleString(currency === "HKD" ? "en-US" : "en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </Text>
-              </View>
-            );
-          })
+          recent.map((expense, index) => (
+            <TransactionItem
+              key={expense.id}
+              expense={expense}
+              currency={currency}
+              exchangeRate={exchangeRate}
+              showTimeOnly={false}
+              isLast={index === recent.length - 1}
+            />
+          ))
         )}
       </View>
     </View>
@@ -103,43 +70,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(193, 198, 215, 0.2)",
-  },
-  transactionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f3fe",
-  },
-  transactionItemLast: {
-    borderBottomWidth: 0,
-  },
-  transIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  transDetails: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  transTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#181c23",
-  },
-  transSub: {
-    fontSize: 10,
-    color: "#717786",
-    marginTop: 2,
-  },
-  transAmount: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#181c23",
   },
   emptyState: {
     alignItems: "center",

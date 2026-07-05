@@ -32,15 +32,15 @@ export async function createTrip(name, budgetHkd, exchangeRate) {
   return { id, name, budget_hkd: budgetHkd, exchange_rate: exchangeRate, created_at: now, duration_days: 7, currency_preference: "PHP" };
 }
 
-export async function addExpense(tripId, { phpAmount, category, note, transactionDate, source = "manual" }) {
+export async function addExpense(tripId, { phpAmount, category, note, transactionDate, source = "manual", imageUri = null }) {
   const id = genId();
   const now = Date.now();
   const date = transactionDate ?? now;
   await withDB((db) => db.runAsync(
-    "INSERT INTO expenses (id, trip_id, php_amount, category, note, date, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [id, tripId, phpAmount, category, note ?? "", date, source, now]
+    "INSERT INTO expenses (id, trip_id, php_amount, category, note, date, source, image_uri, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [id, tripId, phpAmount, category, note ?? "", date, source, imageUri, now]
   ));
-  return { id, tripId, phpAmount, category, note, transactionDate: date, source, createdAt: now };
+  return { id, tripId, phpAmount, category, note, transactionDate: date, source, imageUri, createdAt: now };
 }
 
 export async function getExpensesForTrip(tripId) {

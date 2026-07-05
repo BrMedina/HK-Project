@@ -2,41 +2,17 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Pressable, ActivityIndic
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect, useRef } from "react";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import { consumeFromDashboard } from "../lib/navigationFlag";
-import { Menu, Bell, Search, Utensils, Train, ShoppingBag, Camera, HelpCircle, Trash2 } from "lucide-react-native";
+import { Search } from "lucide-react-native";
 import { deleteExpense, getAllTrips, getExpensesForTrip } from "../db/queries";
 import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import DeleteTransactionDialog from "../components/DeleteTransactionDialog";
+import TransactionItem, { Expense } from "../components/TransactionItem";
 import { getCategoryColor } from "../lib/categoryColors";
 
-type Expense = {
-  id: string;
-  note: string;
-  category: string;
-  php_amount: number;
-  date: number;
-  source: string;
-};
-
 const CATEGORIES = ["All", "Food", "Transport", "Shopping", "Activities"];
-
-const CATEGORY_ICONS: Record<string, { icon: React.ReactNode; bg: string }> = {
-  Food: { icon: <Utensils size={20} color={getCategoryColor("Food").color} />, bg: getCategoryColor("Food").bg },
-  Transport: { icon: <Train size={20} color={getCategoryColor("Transport").color} />, bg: getCategoryColor("Transport").bg },
-  Shopping: { icon: <ShoppingBag size={20} color={getCategoryColor("Shopping").color} />, bg: getCategoryColor("Shopping").bg },
-  Activities: { icon: <Camera size={20} color={getCategoryColor("Activities").color} />, bg: getCategoryColor("Activities").bg },
-};
-
-function getIconConfig(category: string) {
-  return CATEGORY_ICONS[category] ?? { icon: <HelpCircle size={20} color="#717786" />, bg: "#ebedf8" };
-}
-
-function formatTime(timestamp: number): string {
-  const d = new Date(timestamp);
-  return d.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" });
-}
 
 export default function TransactionsScreen() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -194,43 +170,15 @@ export default function TransactionsScreen() {
               <View key={groupKey} style={styles.groupContainer}>
                 <Text style={styles.groupHeader}>{groupKey}</Text>
                 <View style={styles.cardList}>
-                  {grouped[groupKey].map((item, index) => {
-                    const { icon, bg } = getIconConfig(item.category);
-                    const isLast = index === grouped[groupKey].length - 1;
-                    return (
-                      <View
-                        key={item.id}
-                        style={[styles.transactionCard, isLast && styles.transactionCardLast]}
-                      >
-                        <View style={styles.transLeft}>
-                          <View style={[styles.iconContainer, { backgroundColor: bg }]}>
-                            {icon}
-                          </View>
-                          <View style={styles.details}>
-                            <Text style={styles.transTitle} numberOfLines={1}>
-                              {item.note || item.category}
-                            </Text>
-                            <Text style={styles.transSub}>
-                              {item.category} • {formatTime(item.date)}
-                            </Text>
-                          </View>
-                        </View>
-                        <View style={styles.amountActions}>
-                          <Text style={styles.transAmount}>
-                            -PHP {item.php_amount.toLocaleString("en-PH")}
-                          </Text>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`Delete ${item.note || item.category}`}
-                            onPress={() => handleDeleteExpense(item)}
-                            style={styles.deleteButton}
-                          >
-                            <Trash2 size={16} color="#ef4444" />
-                          </Pressable>
-                        </View>
-                      </View>
-                    );
-                  })}
+                  {grouped[groupKey].map((item, index) => (
+                    <TransactionItem
+                      key={item.id}
+                      expense={item}
+                      showTimeOnly={true}
+                      onDelete={handleDeleteExpense}
+                      isLast={index === grouped[groupKey].length - 1}
+                    />
+                  ))}
                 </View>
               </View>
             ))
@@ -354,61 +302,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(109, 122, 118, 0.1)",
   },
-  transactionCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f3fe",
-  },
-  transactionCardLast: {
-    borderBottomWidth: 0,
-  },
-  transLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    marginRight: 12,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  details: {
-    flex: 1,
-  },
-  transTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0b1c30",
-  },
-  transSub: {
-    fontSize: 12,
-    color: "#6d7a76",
-    marginTop: 2,
-  },
-  transAmount: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0b1c30",
-  },
-  amountActions: {
-    alignItems: "flex-end",
-    gap: 8,
-  },
-  deleteButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
-  },
+
   emptyState: {
     paddingVertical: 40,
     alignItems: "center",

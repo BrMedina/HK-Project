@@ -72,3 +72,18 @@ Join our community of developers creating universal apps.
   Expo Go will not show the widget.
 - `getActiveTripId()` fetches the active trip (falls back to trips[0] or null).
 
+## Share-to-app receipt logging
+
+- `src/share/ShareReceiveScreen.jsx` — reached when the user shares an image
+  into Gala Fund from Android's share sheet (e.g. after screenshotting a
+  GCash receipt). Runs the existing ML Kit OCR + `receiptParser.js` on the
+  shared image, shows a pre-filled confirm screen, and saves via `addExpense`
+  with `source: "share"`.
+- Uses `expo-share-intent`, which registers the app as an image share target
+  and redirects into the app automatically — no custom Android manifest work
+  needed beyond the plugin config.
+- No overlay permission, no screen-capture permission — this only ever
+  touches an image the user explicitly chose to share.
+- Requires native code: `npx expo prebuild` then `npx expo run:android`.
+  Expo Go will not show Gala Fund in the Android share sheet.
+

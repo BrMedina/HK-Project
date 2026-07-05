@@ -50,6 +50,13 @@ export async function getDB() {
         // Column already exists or migration is safe to ignore.
       }
     }
+    try {
+      await db.execAsync("ALTER TABLE expenses ADD COLUMN image_uri TEXT;");
+    } catch (e) {
+      if (!isReleasedDatabaseError(e)) {
+        // Column already exists or migration is safe to ignore.
+      }
+    }
 
     _db = db;
     return db;
