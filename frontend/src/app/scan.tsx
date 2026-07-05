@@ -23,11 +23,17 @@ import { getCategoryColor } from "../lib/categoryColors";
 const CATEGORIES = ["Food", "Transport", "Shopping", "Activities"];
 
 export default function ScanScreen() {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
-  const [activeTab, setActiveTab] = useState<"qr" | "ocr">("qr");
+  const { mode, tab } = useLocalSearchParams<{ mode?: string, tab?: "qr" | "ocr" }>();
+  const [activeTab, setActiveTab] = useState<"qr" | "ocr">(tab || "qr");
   const [tripId, setTripId] = useState<string | null>(null);
   const [loadingTrip, setLoadingTrip] = useState(true);
   const [manualEntryMode, setManualEntryMode] = useState(false);
+
+  useEffect(() => {
+    if (tab === "qr" || tab === "ocr") {
+      setActiveTab(tab);
+    }
+  }, [tab]);
 
   // Scanned result state
   const [scannedData, setScannedData] = useState<{

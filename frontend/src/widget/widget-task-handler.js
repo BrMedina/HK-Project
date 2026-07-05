@@ -1,3 +1,4 @@
+"use no memo";
 import React from "react";
 import { Linking } from "react-native";
 import { QuickAddWidget } from "./QuickAddWidget";
@@ -5,37 +6,53 @@ import { getAllTrips, getTodaySpentPHP, getTotalSpentPHP } from "../db/queries";
 import { fetchExchangeRate } from "../api/currency";
 
 async function getActiveTrip() {
-  const trips = await getAllTrips();
-  return trips.length > 0 ? trips[0] : null;
+  try {
+    const trips = await getAllTrips();
+    return trips.length > 0 ? trips[0] : null;
+  } catch (e) {
+    console.error("Widget getActiveTrip error:", e);
+    return null;
+  }
 }
 
 async function loadWidgetData(activeTrip) {
   if (!activeTrip) {
     return { todaySpentPHP: 0, totalSpentPHP: 0, rate: 7.25, budgetHkd: 0 };
   }
-  const activeTripId = activeTrip.id;
-  const todaySpentPHP = await getTodaySpentPHP(activeTripId);
-  const totalSpentPHP = await getTotalSpentPHP(activeTripId);
-  let rate = activeTrip.exchange_rate || 7.25;
   try {
-    const result = await fetchExchangeRate("HKD", "PHP");
-    rate = result.rate;
+    const activeTripId = activeTrip.id;
+    const todaySpentPHP = await getTodaySpentPHP(activeTripId);
+    const totalSpentPHP = await getTotalSpentPHP(activeTripId);
+    let rate = activeTrip.exchange_rate || 7.25;
+    try {
+      const result = await fetchExchangeRate("HKD", "PHP");
+      rate = result.rate;
+    } catch (e) {
+      // Fallback to database exchange rate if offline or request fails
+    }
+    return { todaySpentPHP, totalSpentPHP, rate, budgetHkd: activeTrip.budget_hkd };
   } catch (e) {
-    // fall back to database rate if offline/failed
+    console.error("Widget loadWidgetData error:", e);
+    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: activeTrip.exchange_rate || 7.25, budgetHkd: activeTrip.budget_hkd };
   }
-  return { todaySpentPHP, totalSpentPHP, rate, budgetHkd: activeTrip.budget_hkd };
 }
 
 export async function widgetTaskHandler(props) {
+  let totalBudgetPHP = 0;
   let todaySpentPHP = 0;
-  let budgetLeftHKD = 0;
+  let totalSpentPHP = 0;
+  let budgetLeftPHP = 0;
+  let spentPercent = 0;
 
   try {
     const activeTrip = await getActiveTrip();
     if (activeTrip) {
       const { todaySpentPHP: today, totalSpentPHP: total, rate, budgetHkd } = await loadWidgetData(activeTrip);
       todaySpentPHP = today || 0;
-      budgetLeftHKD = Math.max(0, budgetHkd - (total / rate));
+      totalSpentPHP = total || 0;
+      totalBudgetPHP = (budgetHkd || 0) * rate;
+      budgetLeftPHP = Math.max(0, totalBudgetPHP - totalSpentPHP);
+      spentPercent = totalBudgetPHP > 0 ? Math.min(Math.round((totalSpentPHP / totalBudgetPHP) * 100), 100) : 0;
     }
   } catch (err) {
     console.error("GalaFund Widget Task Handler Data Load Error:", err);
@@ -47,14 +64,20 @@ export async function widgetTaskHandler(props) {
       case "WIDGET_UPDATE":
       case "WIDGET_RESIZED":
         props.renderWidget(
-          <QuickAddWidget totalSpentPHP={todaySpentPHP} budgetLeftHKD={budgetLeftHKD} />
+          <QuickAddWidget
+            totalBudgetPHP={totalBudgetPHP}
+            totalSpentPHP={totalSpentPHP}
+            budgetLeftPHP={budgetLeftPHP}
+            spentPercent={spentPercent}
+          />
         );
         break;
 
       case "WIDGET_CLICK":
-        if (props.clickAction === "OPEN_ADD_EXPENSE") {
-          await props.requestWidgetUpdate?.();
-          Linking.openURL("galafund://add");
+        if (props.clickAction === "SCAN_QR") {
+          Linking.openURL("galafund://scan?tab=qr");
+        } else if (props.clickAction === "MANUAL_ENTRY") {
+          Linking.openURL("galafund://scan?mode=manual");
         }
         break;
 
