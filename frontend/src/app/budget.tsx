@@ -221,7 +221,7 @@ export default function BudgetScreen() {
               remainingPhp={remainingPhp}
               spentPercent={spentPercent}
               currency={currencyPreference}
-              exchangeRate={trip?.exchange_rate || 6.5}
+              exchangeRate={trip?.exchange_rate || 7.84}
             />
 
             {/* Daily Limit Grid */}

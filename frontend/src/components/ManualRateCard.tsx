@@ -27,7 +27,7 @@ export default function ManualRateCard({ customRateInput, saving, onRateChange, 
             keyboardType="decimal-pad"
             value={customRateInput}
             onChangeText={onRateChange}
-            placeholder="7.25"
+            placeholder="7.84"
             placeholderTextColor="rgba(255,255,255,0.4)"
           />
           <Text style={s.currency}>PHP</Text>

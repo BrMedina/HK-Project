@@ -17,13 +17,13 @@ async function getActiveTrip() {
 
 async function loadWidgetData(activeTrip) {
   if (!activeTrip) {
-    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: 7.25, budgetHkd: 0 };
+    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: 7.84, budgetHkd: 0 };
   }
   try {
     const activeTripId = activeTrip.id;
     const todaySpentPHP = await getTodaySpentPHP(activeTripId);
     const totalSpentPHP = await getTotalSpentPHP(activeTripId);
-    let rate = activeTrip.exchange_rate || 7.25;
+    let rate = activeTrip.exchange_rate || 7.84;
     try {
       const result = await fetchExchangeRate("HKD", "PHP");
       rate = result.rate;
@@ -33,7 +33,7 @@ async function loadWidgetData(activeTrip) {
     return { todaySpentPHP, totalSpentPHP, rate, budgetHkd: activeTrip.budget_hkd };
   } catch (e) {
     console.error("Widget loadWidgetData error:", e);
-    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: activeTrip.exchange_rate || 7.25, budgetHkd: activeTrip.budget_hkd };
+    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: activeTrip.exchange_rate || 7.84, budgetHkd: activeTrip.budget_hkd };
   }
 }
 

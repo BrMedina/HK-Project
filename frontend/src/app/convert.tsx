@@ -56,6 +56,7 @@ export default function ConvertScreen() {
                 <TrendingUp size={14} color="#007dfe" />
                 <Text style={s.badgeText}>Live Rate: 1 HKD = {c.rate} PHP</Text>
               </View>
+              <Text style={s.rateNote}>Updates every 6 hours from the web, not every second.</Text>
             </View>
           </ImageBackground>
 
@@ -67,15 +68,16 @@ export default function ConvertScreen() {
             onPhpChange={c.handlePhpChange}
             onHkdChange={c.handleHkdChange}
             onSwap={c.handleSwap}
+            onRefresh={c.handleRefreshRate}
           />
 
           {/* Rate History */}
           <View style={s.card}>
             <View style={s.cardHeader}>
               <Text style={s.cardTitle}>Rate Adjustments</Text>
-              <Pressable style={s.resetBtn} onPress={c.handleResetHistory}>
+              <Pressable style={s.resetBtn} onPress={c.handleRefreshRate}>
                 <RotateCcw size={12} color="#007dfe" />
-                <Text style={s.resetText}>Reset to Default</Text>
+                <Text style={s.resetText}>{c.refreshing ? "Refreshing..." : "Refresh Live Rate"}</Text>
               </Pressable>
             </View>
             {c.rateHistory.map((e, i) => (
@@ -121,6 +123,7 @@ const s = StyleSheet.create({
   heroTitle: { fontSize: 36, fontWeight: "800", color: "#181c23", letterSpacing: -0.5, marginBottom: 10 },
   badge: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 6, backgroundColor: "rgba(214,227,255,0.45)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   badgeText: { fontSize: 14, fontWeight: "700", color: "#007dfe" },
+  rateNote: { marginTop: 8, fontSize: 12, lineHeight: 16, color: "#717786", fontWeight: "500" },
 
   // Rate history card
   card: {

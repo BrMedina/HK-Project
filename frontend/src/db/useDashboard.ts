@@ -3,7 +3,7 @@ import { getAllTrips, createTrip, getExpensesForTrip, getTotalSpentPHP, getTotal
 
 const DEFAULT_TRIP_NAME = "Hong Kong Trip";
 const DEFAULT_BUDGET_HKD = 5000;
-const DEFAULT_EXCHANGE_RATE = 6.5; // 1 HKD ≈ 6.5 PHP
+const DEFAULT_EXCHANGE_RATE = 7.84; // 1 HKD ≈ 7.84 PHP
 
 export type Trip = {
   id: string;

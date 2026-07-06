@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Alert } from "react-native";
 import { getAllTrips, updateTripExchangeRate } from "./queries";
+import { fetchExchangeRate } from "../api/currency";
 
 // ---------------------------------------------------------------------------
 // Types (re-exported so components can use them)
@@ -55,7 +56,7 @@ const sanitize = (t: string) => t.replace(/[^0-9.]/g, "");
 export function useConverter() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
-  const [rate, setRate] = useState(7.25);
+  const [rate, setRate] = useState(7.84);
   const [rateHistory, setRateHistory] = useState<RateEntry[]>([]);
 
   const [phpValue, setPhpValue] = useState("1000");
@@ -64,6 +65,7 @@ export function useConverter() {
 
   const [customRateInput, setCustomRateInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // ---- Load trip ----
   useEffect(() => {
@@ -143,6 +145,27 @@ export function useConverter() {
     }
   };
 
+  const handleRefreshRate = async () => {
+    if (!trip) return;
+    try {
+      setRefreshing(true);
+      const result = await fetchExchangeRate("HKD", "PHP", true);
+      setRate(result.rate);
+      setTrip({ ...trip, exchange_rate: result.rate });
+      setCustomRateInput(result.rate.toString());
+      await updateTripExchangeRate(trip.id, result.rate);
+      setRateHistory((prev) => [
+        { id: Date.now().toString(), date: formatDateLabel(new Date()), rate: result.rate, isCurrent: true },
+        ...prev.map((e) => ({ ...e, isCurrent: false })),
+      ]);
+    } catch (err) {
+      console.error("Failed to refresh rate:", err);
+      Alert.alert("Error", "Could not refresh live rate.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleResetHistory = () => { if (trip) setRateHistory(buildInitialHistory(rate)); };
 
   const handleCustomRateChange = (t: string) => setCustomRateInput(sanitize(t));
@@ -150,8 +173,8 @@ export function useConverter() {
   return {
     trip, loading, rate, rateHistory,
     phpValue, hkdValue, isSwapped,
-    customRateInput, saving,
+    customRateInput, saving, refreshing,
     handlePhpChange, handleHkdChange, handleSwap,
-    handleSaveRate, handleResetHistory, handleCustomRateChange,
+    handleSaveRate, handleResetHistory, handleCustomRateChange, handleRefreshRate,
   };
 }

@@ -60,7 +60,7 @@ export default function ScanScreen() {
           setTripId(trips[0].id);
         } else {
           // Fallback trip creation
-          const newTrip = await createTrip("Hong Kong Trip", 5000, 6.5);
+          const newTrip = await createTrip("Hong Kong Trip", 5000, 7.84);
           setTripId(newTrip.id);
         }
       } catch (err) {

@@ -42,10 +42,12 @@ interface ExchangeRateResult {
 
 // Fetch the exchange rate between two currencies, e.g. fetchExchangeRate("HKD", "PHP")
 // Returns { rate, date, fromCache } — rate is "1 <from> = rate <to>"
-export async function fetchExchangeRate(from = "HKD", to = "PHP"): Promise<ExchangeRateResult> {
+export async function fetchExchangeRate(from = "HKD", to = "PHP", forceRefresh = false): Promise<ExchangeRateResult> {
   const cacheKey = `frankfurter:${from}:${to}`;
-  const cached = await getCached(cacheKey);
-  if (cached) return { ...cached, fromCache: true };
+  if (!forceRefresh) {
+    const cached = await getCached(cacheKey);
+    if (cached) return { ...cached, fromCache: true };
+  }
 
   const res = await fetch(`${BASE_URL}?from=${from}&to=${to}`);
   if (!res.ok) {

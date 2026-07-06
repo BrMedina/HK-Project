@@ -9,10 +9,11 @@ type Props = {
   onPhpChange: (t: string) => void;
   onHkdChange: (t: string) => void;
   onSwap: () => void;
+  onRefresh: () => void;
 };
 
 export default function QuickConverter({
-  isSwapped, phpValue, hkdValue, onPhpChange, onHkdChange, onSwap,
+  isSwapped, phpValue, hkdValue, onPhpChange, onHkdChange, onSwap, onRefresh,
 }: Props) {
   const topLabel = isSwapped ? "HONG KONG DOLLAR (HKD)" : "PHILIPPINE PESO (PHP)";
   const topSymbol = isSwapped ? "$" : "₱";
@@ -49,7 +50,7 @@ export default function QuickConverter({
           <Info size={16} color="#39baa6" />
           <Text style={s.infoText}>Rates are updated every 15 minutes based on market data.</Text>
         </View>
-        <Pressable>
+        <Pressable onPress={onRefresh}>
           <Text style={s.refreshLink}>REFRESH</Text>
         </Pressable>
       </View>
