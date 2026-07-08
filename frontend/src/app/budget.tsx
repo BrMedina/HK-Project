@@ -4,12 +4,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Stack, router } from "expo-router";
 import { Menu, Bell, Calendar, ShieldCheck, Settings, ChevronDown, Utensils, Train, ShoppingBag, Camera, HelpCircle, Wallet } from "lucide-react-native";
-import { getAllTrips, getExpensesForTrip, updateTripPreferences, deleteAllExpensesForTrip } from "../db/queries";
+import { updateTripPreferences, deleteAllExpensesForTrip } from "../db/queries";
 import BottomNav from "../components/BottomNav";
 import BudgetCard from "../components/BudgetCard";
 import Header from "../components/Header";
 import { getCategoryColor } from "../lib/categoryColors";
 import ResetTransactionsDialog from "../components/ResetTransactionsDialog";
+import { useDashboard } from "../db/useDashboard";
 
 type Trip = {
   id: string;
@@ -58,9 +59,18 @@ function getIconConfig(category: string) {
 }
 
 export default function BudgetScreen() {
-  const [trip, setTrip] = useState<Trip | null>(null);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    trip,
+    expenses,
+    totalSpent,
+    categoryTotals,
+    budgetPhp,
+    remainingPhp,
+    spentPercent,
+    loading,
+    refresh,
+  } = useDashboard();
+
   const [durationDays, setDurationDays] = useState(7);
   const [currencyPreference, setCurrencyPreference] = useState("PHP");
 
@@ -73,40 +83,19 @@ export default function BudgetScreen() {
   const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true);
-        const trips = await getAllTrips();
-        if (trips.length > 0) {
-          const activeTrip = trips[0] as Trip;
-          setTrip(activeTrip);
-          const list = await getExpensesForTrip(activeTrip.id);
-          setExpenses(list as unknown as Expense[]);
-          if (activeTrip.duration_days) {
-            setDurationDays(activeTrip.duration_days);
-            setDurationInputText(activeTrip.duration_days.toString());
-          } else {
-            setDurationInputText("7");
-          }
-          if (activeTrip.currency_preference) {
-            setCurrencyPreference(activeTrip.currency_preference);
-          }
-          const initialBudgetPhp = activeTrip.budget_hkd * activeTrip.exchange_rate;
-          setBudgetInputPhp(Math.round(initialBudgetPhp).toString());
-        }
-      } catch (err) {
-        console.error("Failed to load budget data:", err);
-      } finally {
-        setLoading(false);
+    if (trip) {
+      if (trip.duration_days) {
+        setDurationDays(trip.duration_days);
+        setDurationInputText(trip.duration_days.toString());
+      } else {
+        setDurationInputText("7");
       }
+      if (trip.currency_preference) {
+        setCurrencyPreference(trip.currency_preference);
+      }
+      setBudgetInputPhp(Math.round(budgetPhp).toString());
     }
-    loadData();
-  }, []);
-
-  const budgetPhp = trip ? trip.budget_hkd * trip.exchange_rate : 0;
-  const totalSpent = expenses.reduce((sum, e) => sum + e.php_amount, 0);
-  const remainingPhp = budgetPhp - totalSpent;
-  const spentPercent = budgetPhp > 0 ? Math.round((totalSpent / budgetPhp) * 100) : 0;
+  }, [trip]);
 
   const dailyLimit = budgetPhp / durationDays;
   const avgDailySpend = totalSpent / durationDays;
@@ -126,17 +115,15 @@ export default function BudgetScreen() {
   const handleSaveChanges = async () => {
     if (!trip) return;
     try {
-      setLoading(true);
       const parsedDays = Number(durationInputText) || 7;
       const parsedBudgetPhp = parseFloat(budgetInputPhp.replace(/,/g, '')) || 30000;
       const budgetHkd = parsedBudgetPhp / trip.exchange_rate;
       await updateTripPreferences(trip.id, parsedDays, currencyPreference, budgetHkd);
       setDurationDays(parsedDays);
+      await refresh();
       router.push("/dashboard");
     } catch (err) {
       console.error("Failed to save preferences:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -163,7 +150,7 @@ export default function BudgetScreen() {
     try {
       setResetting(true);
       await deleteAllExpensesForTrip(trip.id);
-      setExpenses([]);
+      await refresh();
       setShowResetDialog(false);
     } catch (err) {
       console.error("Failed to reset transactions:", err);

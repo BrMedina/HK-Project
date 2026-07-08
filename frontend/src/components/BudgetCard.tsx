@@ -38,6 +38,10 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
   const displaySpent = currency === "HKD" && exchangeRate > 0 ? spentPhp / exchangeRate : spentPhp;
   const displayRemaining = currency === "HKD" && exchangeRate > 0 ? remainingPhp / exchangeRate : remainingPhp;
 
+  const displayBudgetHkd = exchangeRate > 0 ? budgetPhp / exchangeRate : 0;
+  const displaySpentHkd = exchangeRate > 0 ? spentPhp / exchangeRate : 0;
+  const displayRemainingHkd = exchangeRate > 0 ? remainingPhp / exchangeRate : 0;
+
   const fillWidth = `${Math.min(spentPercent, 100)}%` as `${number}%`;
   const safePercent = Math.min(Math.max(spentPercent, 0), 100);
   const size = 64;
@@ -52,8 +56,13 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
     <View style={styles.budgetCard}>
       <View style={styles.budgetTopRow}>
         <View style={styles.budgetLeft}>
-          <Text style={styles.budgetLabel}>Total Budget</Text>
-          <Text style={styles.budgetValue}>{formatCurrency(displayBudget, currency)}</Text>
+          <Text style={styles.budgetLabel}>Total budget</Text>
+          <View style={styles.budgetValueBlock}>
+            <Text style={styles.budgetValue}>{formatCurrency(displayBudget, currency)}</Text>
+            {currency === "PHP" && exchangeRate > 0 && (
+              <Text style={styles.secondaryValue}>{formatCurrency(displayBudgetHkd, "HKD")}</Text>
+            )}
+          </View>
         </View>
         <View style={styles.progressCircleContainer}>
           <Svg width={size} height={size} style={styles.svg}>
@@ -75,26 +84,33 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
               />
             )}
           </Svg>
-          <Image
-            source={require("../../assets/galafund.png")}
-            style={styles.circleLogo}
-            resizeMode="contain"
-          />
+          <View style={styles.circleCenter}>
+            <Text style={styles.circlePercentage}>{spentPercent}%</Text>
+          </View>
         </View>
       </View>
 
       <View style={styles.budgetBottom}>
-        <View style={styles.spentInfo}>
-          <Text style={styles.spentText}>
-            Spent <Text style={styles.spentAmount}>{formatCurrency(displaySpent, currency)}</Text> • {spentPercent}%
-          </Text>
+        <View style={styles.metricRow}>
+          <Text style={styles.metricLabel}>Spent</Text>
+          <View style={styles.primaryValueBlock}>
+            <Text style={[styles.metricValue, spentPercent >= 80 && { color: "#ef4444" }]}>{formatCurrency(displaySpent, currency)}</Text>
+            {currency === "PHP" && exchangeRate > 0 && (
+              <Text style={styles.secondaryValue}>{formatCurrency(displaySpentHkd, "HKD")}</Text>
+            )}
+          </View>
         </View>
         <View style={styles.progressBarBg}>
           <View style={[styles.progressBarFill, { width: fillWidth }, spentPercent >= 80 && { backgroundColor: "#ef4444" }]} />
         </View>
-        <View style={styles.remainingRow}>
-          <Text style={styles.remainingLabel}>Remaining</Text>
-          <Text style={[styles.remainingValue, spentPercent >= 80 && { color: "#ef4444" }]}>{formatCurrency(displayRemaining, currency)}</Text>
+        <View style={styles.metricRow}>
+          <Text style={styles.metricLabel}>Remaining</Text>
+          <View style={styles.primaryValueBlock}>
+            <Text style={[styles.metricValue, spentPercent >= 80 && { color: "#ef4444" }]}>{formatCurrency(displayRemaining, currency)}</Text>
+            {currency === "PHP" && exchangeRate > 0 && (
+              <Text style={styles.secondaryValue}>{formatCurrency(displayRemainingHkd, "HKD")}</Text>
+            )}
+          </View>
         </View>
       </View>
     </View>
@@ -134,6 +150,9 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#181c23",
   },
+  budgetValueBlock: {
+    marginTop: 2,
+  },
   progressCircleContainer: {
     width: 72,
     height: 72,
@@ -144,24 +163,42 @@ const styles = StyleSheet.create({
   svg: {
     position: "absolute",
   },
-  circleLogo: {
-    width: 28,
-    height: 28,
+  circleCenter: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
     position: "absolute",
   },
-  budgetBottom: {
-    gap: 10,
-  },
-  spentInfo: {
-    flexDirection: "row",
-  },
-  spentText: {
+  circlePercentage: {
     fontSize: 12,
-    color: "#414754",
+    fontWeight: "800",
+    color: "#181c23",
   },
-  spentAmount: {
-    color: "#007dfe",
+  budgetBottom: {
+    gap: 8,
+  },
+  metricRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: "#717786",
+  },
+  metricValue: {
+    fontSize: 14,
     fontWeight: "700",
+    color: "#39baa6",
+  },
+  primaryValueBlock: {
+    alignItems: "flex-end",
+  },
+  secondaryValue: {
+    fontSize: 11,
+    color: "#94a3b8",
+    marginTop: 2,
   },
   progressBarBg: {
     height: 8,
