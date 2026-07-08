@@ -23,6 +23,7 @@ import { getAllTrips, createTrip, addExpense } from "../db/queries";
 import { getCategoryColor } from "../lib/categoryColors";
 
 const CATEGORIES = ["Food", "Transport", "Shopping", "Activities"];
+const DEFAULT_EXCHANGE_RATE = 7.84;
 
 export default function ShareReceiveScreen() {
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
@@ -32,6 +33,8 @@ export default function ShareReceiveScreen() {
   const [parsed, setParsed] = useState(null);
   const [error, setError] = useState("");
   const [category, setCategory] = useState("Food");
+  const [amountCurrency, setAmountCurrency] = useState("HKD");
+  const [exchangeRate, setExchangeRate] = useState(DEFAULT_EXCHANGE_RATE);
 
   useEffect(() => {
     async function loadActiveTrip() {
@@ -40,9 +43,11 @@ export default function ShareReceiveScreen() {
         const trips = await getAllTrips();
         if (trips.length > 0) {
           setTripId(trips[0].id);
+          setExchangeRate(trips[0].exchange_rate || DEFAULT_EXCHANGE_RATE);
         } else {
-          const newTrip = await createTrip("Hong Kong Trip", 5000, 7.84);
+          const newTrip = await createTrip("Hong Kong Trip", 5000, DEFAULT_EXCHANGE_RATE);
           setTripId(newTrip.id);
+          setExchangeRate(newTrip.exchange_rate || DEFAULT_EXCHANGE_RATE);
         }
       } catch (err) {
         console.error("Failed to load active trip for share receive:", err);
@@ -86,6 +91,26 @@ export default function ShareReceiveScreen() {
     }
   };
 
+  const getConvertedAmount = (value, from) => {
+    const parsedValue = parseFloat(value?.toString().replace(/,/g, ""));
+    if (!value || Number.isNaN(parsedValue) || parsedValue <= 0) {
+      return 0;
+    }
+    if (from === "HKD") {
+      return Number((parsedValue * exchangeRate).toFixed(2));
+    }
+    return Number((parsedValue / exchangeRate).toFixed(2));
+  };
+
+  const toggleAmountCurrency = () => {
+    const nextCurrency = amountCurrency === "HKD" ? "PHP" : "HKD";
+    if (parsed?.amount) {
+      const converted = getConvertedAmount(parsed.amount, amountCurrency);
+      setParsed({ ...parsed, amount: converted });
+    }
+    setAmountCurrency(nextCurrency);
+  };
+
   const save = async () => {
     if (!parsed?.amount || !tripId) return;
     
@@ -97,8 +122,12 @@ export default function ShareReceiveScreen() {
       }
     }
 
+    const phpAmount = amountCurrency === "PHP"
+      ? parsed.amount
+      : Number((parsed.amount * exchangeRate).toFixed(2));
+
     await addExpense(tripId, {
-      phpAmount: parsed.amount,
+      phpAmount,
       category,
       note: parsed.referenceNumber ? `Ref ${parsed.referenceNumber}` : "Shared receipt",
       transactionDate: tDate,
@@ -195,7 +224,12 @@ export default function ShareReceiveScreen() {
 
             {/* Amount input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>AMOUNT (PHP)</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>AMOUNT ({amountCurrency})</Text>
+                <Pressable style={styles.currencyToggle} onPress={toggleAmountCurrency}>
+                  <Text style={styles.currencyToggleText}>Switch to {amountCurrency === "HKD" ? "PHP" : "HKD"}</Text>
+                </Pressable>
+              </View>
               <TextInput
                 style={styles.amountInput}
                 value={parsed?.amount ? String(parsed.amount) : ""}
@@ -204,6 +238,13 @@ export default function ShareReceiveScreen() {
                 keyboardType="decimal-pad"
                 placeholderTextColor="#717786"
               />
+              <Text style={styles.conversionHint}>
+                {parsed?.amount
+                  ? `≈ ${amountCurrency === "HKD" ? "PHP" : "HKD"} ${amountCurrency === "HKD"
+                      ? getConvertedAmount(parsed.amount, "HKD").toFixed(2)
+                      : getConvertedAmount(parsed.amount, "PHP").toFixed(2)}`
+                  : `Enter an amount to see the ${amountCurrency === "HKD" ? "PHP" : "HKD"} equivalent`}
+              </Text>
             </View>
 
             {/* Category picker */}
@@ -303,6 +344,7 @@ const styles = StyleSheet.create({
   preview: { width: "100%", height: 200, marginBottom: 20, borderRadius: 14 },
   inputGroup: { marginBottom: 24 },
   label: { fontSize: 10, fontWeight: "800", color: "#717786", marginBottom: 8, letterSpacing: 0.5 },
+  labelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   amountInput: {
     fontSize: 32,
     fontWeight: "800",
@@ -310,6 +352,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: "#007dfe",
     paddingVertical: 6,
+  },
+  currencyToggle: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: "rgba(57, 186, 166, 0.12)",
+  },
+  currencyToggleText: { fontSize: 11, fontWeight: "700", color: "#39baa6" },
+  conversionHint: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#39baa6",
   },
   categoryRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 },
   categoryChip: {

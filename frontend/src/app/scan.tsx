@@ -21,6 +21,8 @@ import ReceiptScannerScreen from "../scanner/ReceiptScannerScreen";
 import { getCategoryColor } from "../lib/categoryColors";
 
 const CATEGORIES = ["Food", "Transport", "Shopping", "Activities"];
+type AmountCurrency = "HKD" | "PHP";
+const DEFAULT_EXCHANGE_RATE = 7.84;
 
 export default function ScanScreen() {
   const { mode, tab } = useLocalSearchParams<{ mode?: string, tab?: "qr" | "ocr" }>();
@@ -28,6 +30,8 @@ export default function ScanScreen() {
   const [tripId, setTripId] = useState<string | null>(null);
   const [loadingTrip, setLoadingTrip] = useState(true);
   const [manualEntryMode, setManualEntryMode] = useState(false);
+  const [amountCurrency, setAmountCurrency] = useState<AmountCurrency>("HKD");
+  const [tripExchangeRate, setTripExchangeRate] = useState(DEFAULT_EXCHANGE_RATE);
 
   useEffect(() => {
     if (tab === "qr" || tab === "ocr") {
@@ -57,11 +61,14 @@ export default function ScanScreen() {
         setLoadingTrip(true);
         const trips = await getAllTrips();
         if (trips.length > 0) {
-          setTripId(trips[0].id);
+          const activeTrip = trips[0];
+          setTripId(activeTrip.id);
+          setTripExchangeRate(activeTrip.exchange_rate || DEFAULT_EXCHANGE_RATE);
         } else {
           // Fallback trip creation
-          const newTrip = await createTrip("Hong Kong Trip", 5000, 7.84);
+          const newTrip = await createTrip("Hong Kong Trip", 5000, DEFAULT_EXCHANGE_RATE);
           setTripId(newTrip.id);
+          setTripExchangeRate(newTrip.exchange_rate || DEFAULT_EXCHANGE_RATE);
         }
       } catch (err) {
         console.error("Failed to load active trip for scan:", err);
@@ -72,10 +79,37 @@ export default function ScanScreen() {
     loadActiveTrip();
   }, []);
 
+  const handleAmountChange = (value: string) => {
+    setAmountInput(value.replace(/[^0-9.]/g, ""));
+  };
+
+  const getConvertedAmount = (value: string, from: AmountCurrency) => {
+    const parsedValue = parseFloat(value.replace(/,/g, ""));
+    if (!value || Number.isNaN(parsedValue) || parsedValue <= 0) {
+      return 0;
+    }
+
+    if (from === "HKD") {
+      return Number((parsedValue * tripExchangeRate).toFixed(2));
+    }
+
+    return Number((parsedValue / tripExchangeRate).toFixed(2));
+  };
+
+  const toggleAmountCurrency = () => {
+    const nextCurrency: AmountCurrency = amountCurrency === "HKD" ? "PHP" : "HKD";
+    if (amountInput) {
+      const convertedValue = getConvertedAmount(amountInput, amountCurrency);
+      setAmountInput(convertedValue.toFixed(2));
+    }
+    setAmountCurrency(nextCurrency);
+  };
+
   const handleScanned = (data: any) => {
     // Populate form with parsed values
     setManualEntryMode(false);
     setScannedData(data);
+    setAmountCurrency("HKD");
     setAmountInput(data.amount ? Math.round(data.amount).toString() : "");
     setNoteInput(data.merchantName || data.note || "");
     // Pre-categorize based on keywords if possible
@@ -104,6 +138,7 @@ export default function ScanScreen() {
       date: null,
       source: "manual",
     });
+    setAmountCurrency("HKD");
     setAmountInput("");
     setNoteInput("");
     setSelectedCategory("Food");
@@ -125,8 +160,10 @@ export default function ScanScreen() {
         return;
       }
 
+      const phpAmount = amountCurrency === "PHP" ? parsedAmount : Number((parsedAmount * tripExchangeRate).toFixed(2));
+
       await addExpense(tripId, {
-        phpAmount: parsedAmount,
+        phpAmount,
         category: selectedCategory,
         note: noteInput || `${selectedCategory} expense`,
         transactionDate: null,
@@ -178,15 +215,27 @@ export default function ScanScreen() {
 
               {/* Amount input */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>AMOUNT (PHP)</Text>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>AMOUNT ({amountCurrency})</Text>
+                  <Pressable style={styles.currencyToggle} onPress={toggleAmountCurrency}>
+                    <Text style={styles.currencyToggleText}>Switch to {amountCurrency === "HKD" ? "PHP" : "HKD"}</Text>
+                  </Pressable>
+                </View>
                 <TextInput
                   style={styles.amountInput}
                   value={amountInput}
-                  onChangeText={(val) => setAmountInput(val.replace(/[^0-9.]/g, ""))}
+                  onChangeText={handleAmountChange}
                   placeholder="0.00"
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   placeholderTextColor="#717786"
                 />
+                <Text style={styles.conversionHint}>
+                  {amountInput
+                    ? `≈ ${amountCurrency === "HKD" ? "PHP" : "HKD"} ${amountCurrency === "HKD"
+                        ? getConvertedAmount(amountInput, "HKD").toFixed(2)
+                        : getConvertedAmount(amountInput, "PHP").toFixed(2)}`
+                    : `Enter an amount to see the ${amountCurrency === "HKD" ? "PHP" : "HKD"} equivalent`}
+                </Text>
               </View>
 
               {/* Note input */}
@@ -356,7 +405,21 @@ const styles = StyleSheet.create({
   formTitle: { fontSize: 20, fontWeight: "800", color: "#181c23" },
   formSub: { fontSize: 12, color: "#717786", marginTop: 4, marginBottom: 24, textTransform: "uppercase", letterSpacing: 0.5 },
   inputGroup: { marginBottom: 20 },
-  label: { fontSize: 10, fontWeight: "800", color: "#717786", marginBottom: 8, letterSpacing: 0.5 },
+  labelRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
+  label: { fontSize: 10, fontWeight: "800", color: "#717786", letterSpacing: 0.5 },
+  currencyToggle: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: "rgba(57, 186, 166, 0.12)",
+  },
+  currencyToggleText: { fontSize: 11, fontWeight: "700", color: "#39baa6" },
+  conversionHint: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#39baa6",
+  },
   amountInput: {
     fontSize: 32,
     fontWeight: "800",
