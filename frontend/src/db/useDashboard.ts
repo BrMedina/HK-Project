@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAllTrips, createTrip, getExpensesForTrip, getTotalSpentPHP, getTotalsByCategory } from "./queries";
 
-const DEFAULT_TRIP_NAME = "Hong Kong Trip";
+const DEFAULT_TRIP_NAME = "Gala Fund";
 const DEFAULT_BUDGET_HKD = 5000;
 const DEFAULT_EXCHANGE_RATE = 7.84; // 1 HKD ≈ 7.84 PHP
 
@@ -60,6 +60,9 @@ export function useDashboard() {
           activeTrip = (await createTrip(DEFAULT_TRIP_NAME, DEFAULT_BUDGET_HKD, DEFAULT_EXCHANGE_RATE)) as unknown as Trip;
         } else {
           activeTrip = trips[0];
+          if (activeTrip.name === "Hong Kong Trip") {
+            activeTrip = { ...activeTrip, name: DEFAULT_TRIP_NAME };
+          }
         }
 
         setTrip(activeTrip);

@@ -66,7 +66,7 @@ export default function ScanScreen() {
           setTripExchangeRate(activeTrip.exchange_rate || DEFAULT_EXCHANGE_RATE);
         } else {
           // Fallback trip creation
-          const newTrip = await createTrip("Hong Kong Trip", 5000, DEFAULT_EXCHANGE_RATE);
+          const newTrip = await createTrip("Gala Fund", 5000, DEFAULT_EXCHANGE_RATE);
           setTripId(newTrip.id);
           setTripExchangeRate(newTrip.exchange_rate || DEFAULT_EXCHANGE_RATE);
         }

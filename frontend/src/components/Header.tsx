@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
-import { ChevronDown, Bell } from "lucide-react-native";
+import { Bell } from "lucide-react-native";
 
 type Props = {
   tripName?: string;
@@ -17,8 +17,7 @@ export default function Header({ tripName = "My Trip", showDropdown = false }: P
           resizeMode="contain"
         />
         <Pressable style={styles.tripSelector} disabled={!showDropdown}>
-          <Text style={styles.tripTitle}>{tripName}</Text>
-          {showDropdown && <ChevronDown size={18} color="#181c23" strokeWidth={2.5} />}
+          <Text style={[styles.tripTitle, showDropdown && styles.brandTitle]}>{tripName}</Text>
         </Pressable>
         <Pressable style={styles.notificationButton}>
           <Bell size={22} color="#181c23" />
@@ -56,6 +55,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "800",
     color: "#181c23",
+  },
+  brandTitle: {
+    fontFamily: "Poppins",
+    color: "#39baa6",
   },
   notificationButton: {
     padding: 4,

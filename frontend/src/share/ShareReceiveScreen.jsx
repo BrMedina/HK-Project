@@ -45,7 +45,7 @@ export default function ShareReceiveScreen() {
           setTripId(trips[0].id);
           setExchangeRate(trips[0].exchange_rate || DEFAULT_EXCHANGE_RATE);
         } else {
-          const newTrip = await createTrip("Hong Kong Trip", 5000, DEFAULT_EXCHANGE_RATE);
+          const newTrip = await createTrip("Gala Fund", 5000, DEFAULT_EXCHANGE_RATE);
           setTripId(newTrip.id);
           setExchangeRate(newTrip.exchange_rate || DEFAULT_EXCHANGE_RATE);
         }
