@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Pressable, Image, Modal, ScrollView } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Train, Utensils, ShoppingBag, Camera, HelpCircle, Trash2, X } from "lucide-react-native";
 import { getCategoryColor } from "../lib/categoryColors";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 export type Expense = {
   id: string;
@@ -56,6 +57,8 @@ export default function TransactionItem({
   const { icon, bg } = getIconConfig(expense.category);
   const displayAmount = currency === "HKD" && exchangeRate > 0 ? expense.php_amount / exchangeRate : expense.php_amount;
   const [modalVisible, setModalVisible] = useState(false);
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
 
   // Normalize image URI (database returns image_uri, app object might use imageUri)
   const imageUri = expense.image_uri || expense.imageUri;
@@ -73,17 +76,17 @@ export default function TransactionItem({
               )}
             </View>
             <View style={styles.details}>
-              <Text style={styles.transTitle} numberOfLines={1}>
+              <Text style={[styles.transTitle, { color: "#fff" }]} numberOfLines={1}>
                 {expense.note || expense.category}
               </Text>
-              <Text style={styles.transSub}>
+              <Text style={[styles.transSub, { color: "rgba(255, 255, 255, 0.7)" }]}>
                 {showTimeOnly
                   ? `${expense.category} • ${formatTime(expense.date)}`
                   : `${formatDate(expense.date)} • ${expense.category}`}
               </Text>
             </View>
           </View>
-          <Text style={styles.transAmount}>
+          <Text style={[styles.transAmount, { color: "#fff" }]}>
             -{currency === "HKD" ? "HKD" : "PHP"} {displayAmount.toLocaleString(currency === "HKD" ? "en-US" : "en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </Text>
         </Pressable>
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f1f3fe",
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   transactionItemLast: {
     borderBottomWidth: 0,
@@ -203,17 +206,14 @@ const styles = StyleSheet.create({
   transTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#181c23",
   },
   transSub: {
     fontSize: 10,
-    color: "#717786",
     marginTop: 2,
   },
   transAmount: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#181c23",
     marginRight: 8,
   },
   deleteButton: {

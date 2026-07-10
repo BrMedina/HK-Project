@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { BackHandler, Platform } from "react-native";
 import { Stack, usePathname, useRouter } from "expo-router";
 import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
+import { ThemeProvider } from "../lib/ThemeContext";
 
 function NavigationWrapper() {
   const pathname = usePathname();
@@ -40,8 +41,10 @@ function NavigationWrapper() {
 
 export default function RootLayout() {
   return (
-    <ShareIntentProvider>
-      <NavigationWrapper />
-    </ShareIntentProvider>
+    <ThemeProvider>
+      <ShareIntentProvider>
+        <NavigationWrapper />
+      </ShareIntentProvider>
+    </ThemeProvider>
   );
 }

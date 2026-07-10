@@ -11,6 +11,7 @@ import Header from "../components/Header";
 import DeleteTransactionDialog from "../components/DeleteTransactionDialog";
 import TransactionItem, { Expense } from "../components/TransactionItem";
 import { getCategoryColor } from "../lib/categoryColors";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 const CATEGORIES = ["All", "Food", "Transport", "Shopping", "Activities"];
 
@@ -22,6 +23,8 @@ export default function TransactionsScreen() {
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const scrollRef = useRef<ScrollView | null>(null);
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
 
   const handleDeleteExpense = (expense: Expense) => setDeleteTarget(expense);
 
@@ -96,8 +99,8 @@ export default function TransactionsScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.bg }]} edges={["top"]}>
+      <StatusBar style={theme === "light" ? "dark" : "light"} />
       <Stack.Screen options={{ headerShown: false }} />
 
       <Header tripName="Transactions" />
@@ -114,12 +117,12 @@ export default function TransactionsScreen() {
       ) : (
         <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <Search size={20} color="#717786" style={styles.searchIcon} />
+          <View style={[styles.searchContainer, { backgroundColor: theme === "light" ? "#eff4ff" : "#2d2d2d" }]}>
+            <Search size={20} color={theme === "light" ? "#717786" : "#8b94a3"} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.text }]}
               placeholder="Search transactions..."
-              placeholderTextColor="#717786"
+              placeholderTextColor={theme === "light" ? "#717786" : "#8b94a3"}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -138,6 +141,7 @@ export default function TransactionsScreen() {
                   key={cat}
                   style={[
                     styles.filterChip,
+                    { backgroundColor: theme === "light" ? "#d3e4fe" : "#2d2d2d", borderColor: theme === "light" ? "transparent" : "#3d4d4a" },
                     isActive && cat !== "All" && {
                       backgroundColor: `${getCategoryColor(cat).color}15`,
                       borderColor: getCategoryColor(cat).color,
@@ -149,6 +153,7 @@ export default function TransactionsScreen() {
                   <Text
                     style={[
                       styles.filterChipText,
+                      { color: theme === "light" ? "#3d4946" : "#a0aab8" },
                       isActive && cat !== "All" && { color: getCategoryColor(cat).color },
                       isActive && cat === "All" && styles.filterChipTextActive,
                     ]}
@@ -163,13 +168,13 @@ export default function TransactionsScreen() {
           {/* Grouped Transaction List */}
           {Object.keys(grouped).length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No transactions found</Text>
+              <Text style={[styles.emptyText, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>No transactions found</Text>
             </View>
           ) : (
             Object.keys(grouped).map((groupKey) => (
               <View key={groupKey} style={styles.groupContainer}>
-                <Text style={styles.groupHeader}>{groupKey}</Text>
-                <View style={styles.cardList}>
+                <Text style={[styles.groupHeader, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>{groupKey}</Text>
+                <View style={[styles.cardList, { backgroundColor: colors.bg, borderColor: theme === "light" ? "rgba(109, 122, 118, 0.1)" : "rgba(100, 110, 108, 0.2)" }]}>
                   {grouped[groupKey].map((item, index) => (
                     <TransactionItem
                       key={item.id}
@@ -231,7 +236,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#0b1c30",
   },
   loadingContainer: {
     flex: 1,
@@ -246,7 +250,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#eff4ff",
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 48,
@@ -258,7 +261,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: "#0b1c30",
   },
   filterContainer: {
     gap: 8,
@@ -269,9 +271,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: "#d3e4fe",
     borderWidth: 1,
-    borderColor: "transparent",
   },
   filterChipActive: {
     backgroundColor: "#006b5e",
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
   filterChipText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#3d4946",
   },
   filterChipTextActive: {
     color: "#fff",
@@ -290,17 +289,14 @@ const styles = StyleSheet.create({
   groupHeader: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#6d7a76",
     textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 8,
   },
   cardList: {
-    backgroundColor: "#fff",
     borderRadius: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "rgba(109, 122, 118, 0.1)",
   },
 
   emptyState: {
@@ -309,6 +305,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: "#6d7a76",
   },
 });

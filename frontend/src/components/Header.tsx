@@ -1,6 +1,7 @@
-import React from "react";
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
-import { Bell } from "lucide-react-native";
+import React, { useRef, useEffect } from "react";
+import { StyleSheet, Text, View, Image, Pressable, Animated } from "react-native";
+import { Moon, Sun } from "lucide-react-native";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 type Props = {
   tripName?: string;
@@ -8,8 +9,19 @@ type Props = {
 };
 
 export default function Header({ tripName = "My Trip", showDropdown = false }: Props) {
+  const { theme, toggleTheme } = useTheme();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const colors = theme === "light" ? lightColors : darkColors;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 1.2, duration: 150, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
+  }, [theme]);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg, borderBottomColor: colors.borderBottom }]}>
       <View style={styles.mainHeader}>
         <Image
           source={require("../../assets/galafund.png")}
@@ -17,11 +29,16 @@ export default function Header({ tripName = "My Trip", showDropdown = false }: P
           resizeMode="contain"
         />
         <Pressable style={styles.tripSelector} disabled={!showDropdown}>
-          <Text style={[styles.tripTitle, showDropdown && styles.brandTitle]}>{tripName}</Text>
+          <Text style={[styles.tripTitle, showDropdown && styles.brandTitle, { color: colors.text }]}>{tripName}</Text>
         </Pressable>
-        <Pressable style={styles.notificationButton}>
-          <Bell size={22} color="#181c23" />
-          <View style={styles.notificationBadge} />
+        <Pressable style={styles.themeButton} onPress={toggleTheme}>
+          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            {theme === "light" ? (
+              <Moon size={22} color={colors.icon} />
+            ) : (
+              <Sun size={22} color={colors.icon} />
+            )}
+          </Animated.View>
         </Pressable>
       </View>
     </View>
@@ -30,9 +47,7 @@ export default function Header({ tripName = "My Trip", showDropdown = false }: P
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#f1f3fe",
   },
   mainHeader: {
     flexDirection: "row",
@@ -54,25 +69,12 @@ const styles = StyleSheet.create({
   tripTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#181c23",
   },
   brandTitle: {
     fontFamily: "Poppins",
     color: "#39baa6",
   },
-  notificationButton: {
+  themeButton: {
     padding: 4,
-    position: "relative",
-  },
-  notificationBadge: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#ef4444",
-    borderWidth: 1.5,
-    borderColor: "#fff",
   },
 });

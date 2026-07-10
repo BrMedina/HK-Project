@@ -11,6 +11,7 @@ import Header from "../components/Header";
 import { getCategoryColor } from "../lib/categoryColors";
 import ResetTransactionsDialog from "../components/ResetTransactionsDialog";
 import { useDashboard } from "../db/useDashboard";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 type Trip = {
   id: string;
@@ -70,6 +71,8 @@ export default function BudgetScreen() {
     loading,
     refresh,
   } = useDashboard();
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
 
   const [durationDays, setDurationDays] = useState(7);
   const [currencyPreference, setCurrencyPreference] = useState("PHP");
@@ -160,8 +163,8 @@ export default function BudgetScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.bg }]} edges={["top"]}>
+      <StatusBar style={theme === "light" ? "dark" : "light"} />
       <Stack.Screen options={{ headerShown: false }} />
 
       <Header tripName={"Trip Budget"} />
@@ -213,13 +216,13 @@ export default function BudgetScreen() {
 
             {/* Daily Limit Grid */}
             <View style={styles.gridRow}>
-              <View style={styles.gridCard}>
-                <Text style={styles.gridLabel}>Daily Limit</Text>
-                <Text style={styles.gridVal}>{currencySymbol} {Math.round(displayDailyLimit).toLocaleString()}</Text>
+              <View style={[styles.gridCard, { backgroundColor: colors.bg, borderColor: theme === "light" ? "rgba(109, 122, 118, 0.1)" : "rgba(100, 110, 108, 0.2)" }]}>
+                <Text style={[styles.gridLabel, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>Daily Limit</Text>
+                <Text style={[styles.gridVal, { color: colors.text }]}>{currencySymbol} {Math.round(displayDailyLimit).toLocaleString()}</Text>
               </View>
-              <View style={styles.gridCard}>
-                <Text style={styles.gridLabel}>Avg. Daily Spend</Text>
-                <Text style={[styles.gridVal, { color: "#007dfe" }]}>
+              <View style={[styles.gridCard, { backgroundColor: colors.bg, borderColor: theme === "light" ? "rgba(109, 122, 118, 0.1)" : "rgba(100, 110, 108, 0.2)" }]}>
+                <Text style={[styles.gridLabel, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>Avg. Daily Spend</Text>
+                <Text style={[styles.gridVal, { color: "#39baa6" }]}>
                   {currencySymbol} {Math.round(displayAvgDailySpend).toLocaleString()}
                 </Text>
               </View>
@@ -227,7 +230,7 @@ export default function BudgetScreen() {
 
             {/* Category Budgets */}
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Category Budgets</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Category Budgets</Text>
             </View>
 
             <View style={styles.categoriesList}>
@@ -242,18 +245,18 @@ export default function BudgetScreen() {
                 const displaySpentCat = currencyPreference === "HKD" && trip ? spent / trip.exchange_rate : spent;
 
                 return (
-                  <View key={catKey} style={styles.categoryCard}>
+                  <View key={catKey} style={[styles.categoryCard, { backgroundColor: colors.bg, borderColor: theme === "light" ? "rgba(109, 122, 118, 0.1)" : "rgba(100, 110, 108, 0.2)" }]}>
                     <View style={[styles.categoryIconBox, { backgroundColor: bg }]}>
                       {icon}
                     </View>
                     <View style={styles.categoryInfo}>
                       <View style={styles.categoryHeader}>
-                        <Text style={styles.categoryName}>{catKey}</Text>
-                        <Text style={styles.categorySpendText}>
+                        <Text style={[styles.categoryName, { color: colors.text }]}>{catKey}</Text>
+                        <Text style={[styles.categorySpendText, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>
                           {currencySymbol} {Math.round(displaySpentCat).toLocaleString()} / {Math.round(displayLimit).toLocaleString()}
                         </Text>
                       </View>
-                      <View style={styles.progressBg}>
+                      <View style={[styles.progressBg, { backgroundColor: theme === "light" ? "#eff4ff" : "#2d2d2d" }]}>
                         <View
                           style={[
                             styles.progressFill,
@@ -268,74 +271,74 @@ export default function BudgetScreen() {
             </View>
 
             {/* Setup preferences section */}
-            <View style={styles.setupCard}>
+            <View style={[styles.setupCard, { backgroundColor: theme === "light" ? "#eff4ff" : "#2d2d2d" }]}>
               <View style={styles.setupHeader}>
                 <Settings size={20} color="#39baa6" />
-                <Text style={styles.setupTitle}>Setup Preferences</Text>
+                <Text style={[styles.setupTitle, { color: colors.text }]}>Setup Preferences</Text>
               </View>
 
               <View style={styles.setupBody}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>TOTAL TRIP BUDGET (PHP)</Text>
-                  <View style={styles.inputWrapper}>
+                  <Text style={[styles.inputLabel, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>TOTAL TRIP BUDGET (PHP)</Text>
+                  <View style={[styles.inputWrapper, { backgroundColor: colors.bg, borderColor: theme === "light" ? "transparent" : "#3d4d4a" }]}>
                     <TextInput
-                      style={styles.inputText}
+                      style={[styles.inputText, { color: colors.text }]}
                       value={getFormattedBudget()}
                       keyboardType="numeric"
                       onChangeText={handleBudgetChange}
                       onFocus={() => setIsBudgetFocused(true)}
                       onBlur={() => setIsBudgetFocused(false)}
                       placeholder="30,000"
-                      placeholderTextColor="#a1a1a1"
+                      placeholderTextColor={theme === "light" ? "#a1a1a1" : "#6d7a76"}
                     />
-                    <Wallet size={18} color="#717786" />
+                    <Wallet size={18} color={theme === "light" ? "#717786" : "#8b94a3"} />
                   </View>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>TRIP DURATION</Text>
-                  <View style={styles.inputWrapper}>
+                  <Text style={[styles.inputLabel, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>TRIP DURATION</Text>
+                  <View style={[styles.inputWrapper, { backgroundColor: colors.bg, borderColor: theme === "light" ? "transparent" : "#3d4d4a" }]}>
                     <TextInput
-                      style={styles.inputText}
+                      style={[styles.inputText, { color: colors.text }]}
                       value={isDurationFocused ? durationInputText : getDurationText(trip?.created_at, Number(durationInputText) || 7)}
                       keyboardType="number-pad"
                       onChangeText={handleDurationChange}
                       onFocus={() => setIsDurationFocused(true)}
                       onBlur={() => setIsDurationFocused(false)}
                       placeholder="7"
-                      placeholderTextColor="#a1a1a1"
+                      placeholderTextColor={theme === "light" ? "#a1a1a1" : "#6d7a76"}
                     />
-                    <Calendar size={18} color="#717786" />
+                    <Calendar size={18} color={theme === "light" ? "#717786" : "#8b94a3"} />
                   </View>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>CURRENCY PREFERENCE</Text>
-                  <Pressable style={styles.inputWrapper} onPress={() => setShowCurrencyDropdown(!showCurrencyDropdown)}>
-                    <Text style={styles.dropdownValueText}>
+                  <Text style={[styles.inputLabel, { color: theme === "light" ? "#6d7a76" : "#7d8a87" }]}>CURRENCY PREFERENCE</Text>
+                  <Pressable style={[styles.inputWrapper, { backgroundColor: colors.bg, borderColor: theme === "light" ? "transparent" : "#3d4d4a" }]} onPress={() => setShowCurrencyDropdown(!showCurrencyDropdown)}>
+                    <Text style={[styles.dropdownValueText, { color: colors.text }]}>
                       {currencyPreference === "HKD" ? "Hong Kong Dollar (HKD)" : "Philippine Peso (PHP)"}
                     </Text>
-                    <ChevronDown size={18} color="#717786" />
+                    <ChevronDown size={18} color={theme === "light" ? "#717786" : "#8b94a3"} />
                   </Pressable>
                   {showCurrencyDropdown && (
-                    <View style={styles.dropdownMenu}>
+                    <View style={[styles.dropdownMenu, { backgroundColor: colors.bg, borderColor: theme === "light" ? "rgba(109, 122, 118, 0.15)" : "rgba(100, 110, 108, 0.2)" }]}>
                       <Pressable
-                        style={styles.dropdownItem}
+                        style={[styles.dropdownItem, { borderBottomColor: theme === "light" ? "rgba(109, 122, 118, 0.05)" : "rgba(100, 110, 108, 0.1)" }]}
                         onPress={() => {
                           setCurrencyPreference("PHP");
                           setShowCurrencyDropdown(false);
                         }}
                       >
-                        <Text style={styles.dropdownItemText}>Philippine Peso (PHP)</Text>
+                        <Text style={[styles.dropdownItemText, { color: colors.text }]}>Philippine Peso (PHP)</Text>
                       </Pressable>
                       <Pressable
-                        style={styles.dropdownItem}
+                        style={[styles.dropdownItem, { borderBottomColor: theme === "light" ? "rgba(109, 122, 118, 0.05)" : "rgba(100, 110, 108, 0.1)" }]}
                         onPress={() => {
                           setCurrencyPreference("HKD");
                           setShowCurrencyDropdown(false);
                         }}
                       >
-                        <Text style={styles.dropdownItemText}>Hong Kong Dollar (HKD)</Text>
+                        <Text style={[styles.dropdownItemText, { color: colors.text }]}>Hong Kong Dollar (HKD)</Text>
                       </Pressable>
                     </View>
                   )}
@@ -398,7 +401,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0b1c30",
   },
   loadingContainer: {
     flex: 1,
@@ -476,23 +478,19 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     flex: 1,
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(109, 122, 118, 0.1)",
   },
   gridLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#6d7a76",
     textTransform: "uppercase",
     marginBottom: 4,
   },
   gridVal: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0b1c30",
   },
   sectionHeader: {
     flexDirection: "row",
@@ -503,7 +501,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#0b1c30",
   },
   categoriesList: {
     gap: 12,
@@ -511,11 +508,9 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     flexDirection: "row",
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(109, 122, 118, 0.1)",
     alignItems: "center",
   },
   categoryIconBox: {
@@ -538,15 +533,12 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#0b1c30",
   },
   categorySpendText: {
     fontSize: 11,
-    color: "#6d7a76",
   },
   progressBg: {
     height: 6,
-    backgroundColor: "#eff4ff",
     borderRadius: 3,
     overflow: "hidden",
   },
@@ -555,7 +547,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   setupCard: {
-    backgroundColor: "#eff4ff",
     borderRadius: 20,
     padding: 20,
     gap: 16,
@@ -568,7 +559,6 @@ const styles = StyleSheet.create({
   setupTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0b1c30",
   },
   setupBody: {
     gap: 12,
@@ -579,47 +569,40 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#6d7a76",
     marginLeft: 4,
   },
   inputWrapper: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 48,
+    borderWidth: 1,
   },
   inputText: {
     flex: 1,
     fontSize: 14,
-    color: "#0b1c30",
     paddingRight: 10,
     paddingVertical: 0,
   },
   dropdownValueText: {
     flex: 1,
     fontSize: 14,
-    color: "#0b1c30",
   },
   dropdownMenu: {
-    backgroundColor: "#fff",
     borderRadius: 12,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: "rgba(109, 122, 118, 0.15)",
     overflow: "hidden",
   },
   dropdownItem: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(109, 122, 118, 0.05)",
   },
   dropdownItemText: {
     fontSize: 14,
-    color: "#0b1c30",
   },
   saveBtn: {
     backgroundColor: "#39baa6",

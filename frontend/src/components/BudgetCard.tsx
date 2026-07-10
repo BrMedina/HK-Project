@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 type Props = {
   budgetPhp: number;
@@ -34,6 +35,9 @@ function describeArc(cx: number, cy: number, radius: number, startAngle: number,
 }
 
 export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPercent, currency = "PHP", exchangeRate = 1 }: Props) {
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
+  
   const displayBudget = currency === "HKD" && exchangeRate > 0 ? budgetPhp / exchangeRate : budgetPhp;
   const displaySpent = currency === "HKD" && exchangeRate > 0 ? spentPhp / exchangeRate : spentPhp;
   const displayRemaining = currency === "HKD" && exchangeRate > 0 ? remainingPhp / exchangeRate : remainingPhp;
@@ -53,14 +57,14 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
   const arcPath = describeArc(size / 2, size / 2, radius, startAngle, endAngle);
 
   return (
-    <View style={styles.budgetCard}>
+    <View style={[styles.budgetCard, { backgroundColor: colors.bg }]}>
       <View style={styles.budgetTopRow}>
         <View style={styles.budgetLeft}>
-          <Text style={styles.budgetLabel}>Total budget</Text>
+          <Text style={[styles.budgetLabel, { color: theme === "light" ? "#414754" : "#a0aab8" }]}>Total budget</Text>
           <View style={styles.budgetValueBlock}>
-            <Text style={styles.budgetValue}>{formatCurrency(displayBudget, currency)}</Text>
+            <Text style={[styles.budgetValue, { color: colors.text }]}>{formatCurrency(displayBudget, currency)}</Text>
             {currency === "PHP" && exchangeRate > 0 && (
-              <Text style={styles.secondaryValue}>{formatCurrency(displayBudgetHkd, "HKD")}</Text>
+              <Text style={[styles.secondaryValue, { color: theme === "light" ? "#94a3b8" : "#5d6875" }]}>{formatCurrency(displayBudgetHkd, "HKD")}</Text>
             )}
           </View>
         </View>
@@ -70,7 +74,7 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke="#ebedf8"
+              stroke={theme === "light" ? "#ebedf8" : "#2d2d2d"}
               strokeWidth={strokeWidth}
               fill="transparent"
             />
@@ -85,30 +89,30 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
             )}
           </Svg>
           <View style={styles.circleCenter}>
-            <Text style={styles.circlePercentage}>{spentPercent}%</Text>
+            <Text style={[styles.circlePercentage, { color: colors.text }]}>{spentPercent}%</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.budgetBottom}>
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Spent</Text>
+          <Text style={[styles.metricLabel, { color: theme === "light" ? "#717786" : "#8b94a3" }]}>Spent</Text>
           <View style={styles.primaryValueBlock}>
             <Text style={[styles.metricValue, spentPercent >= 80 && { color: "#ef4444" }]}>{formatCurrency(displaySpent, currency)}</Text>
             {currency === "PHP" && exchangeRate > 0 && (
-              <Text style={styles.secondaryValue}>{formatCurrency(displaySpentHkd, "HKD")}</Text>
+              <Text style={[styles.secondaryValue, { color: theme === "light" ? "#94a3b8" : "#5d6875" }]}>{formatCurrency(displaySpentHkd, "HKD")}</Text>
             )}
           </View>
         </View>
-        <View style={styles.progressBarBg}>
+        <View style={[styles.progressBarBg, { backgroundColor: theme === "light" ? "#ebedf8" : "#2d2d2d" }]}>
           <View style={[styles.progressBarFill, { width: fillWidth }, spentPercent >= 80 && { backgroundColor: "#ef4444" }]} />
         </View>
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>Remaining</Text>
+          <Text style={[styles.metricLabel, { color: theme === "light" ? "#717786" : "#8b94a3" }]}>Remaining</Text>
           <View style={styles.primaryValueBlock}>
             <Text style={[styles.metricValue, spentPercent >= 80 && { color: "#ef4444" }]}>{formatCurrency(displayRemaining, currency)}</Text>
             {currency === "PHP" && exchangeRate > 0 && (
-              <Text style={styles.secondaryValue}>{formatCurrency(displayRemainingHkd, "HKD")}</Text>
+              <Text style={[styles.secondaryValue, { color: theme === "light" ? "#94a3b8" : "#5d6875" }]}>{formatCurrency(displayRemainingHkd, "HKD")}</Text>
             )}
           </View>
         </View>
@@ -119,7 +123,6 @@ export default function BudgetCard({ budgetPhp, spentPhp, remainingPhp, spentPer
 
 const styles = StyleSheet.create({
   budgetCard: {
-    backgroundColor: "#fff",
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
@@ -142,13 +145,11 @@ const styles = StyleSheet.create({
   },
   budgetLabel: {
     fontSize: 13,
-    color: "#414754",
     marginBottom: 4,
   },
   budgetValue: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#181c23",
   },
   budgetValueBlock: {
     marginTop: 2,
@@ -173,7 +174,6 @@ const styles = StyleSheet.create({
   circlePercentage: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#181c23",
   },
   budgetBottom: {
     gap: 8,
@@ -185,7 +185,6 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 12,
-    color: "#717786",
   },
   metricValue: {
     fontSize: 14,
@@ -197,13 +196,11 @@ const styles = StyleSheet.create({
   },
   secondaryValue: {
     fontSize: 11,
-    color: "#94a3b8",
     marginTop: 2,
   },
   progressBarBg: {
     height: 8,
     alignSelf: "stretch" as const,
-    backgroundColor: "#ebedf8",
     borderRadius: 4,
     overflow: "hidden",
   },
@@ -220,7 +217,6 @@ const styles = StyleSheet.create({
   },
   remainingLabel: {
     fontSize: 12,
-    color: "#414754",
   },
   remainingValue: {
     fontSize: 14,

@@ -11,6 +11,7 @@ import QuickOverview from "../components/QuickOverview";
 import RecentTransactions from "../components/RecentTransactions";
 import BottomNav from "../components/BottomNav";
 import { useDashboard } from "../db/useDashboard";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 export default function Dashboard() {
   const {
@@ -23,10 +24,12 @@ export default function Dashboard() {
     spentPercent,
     loading,
   } = useDashboard();
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.bg }]} edges={["top"]}>
+      <StatusBar style={theme === "light" ? "dark" : "light"} />
       <Stack.Screen options={{ headerShown: false }} />
 
       <Header tripName={trip?.name ?? "My Trip"} showDropdown={true} />
@@ -34,7 +37,7 @@ export default function Dashboard() {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#39baa6" />
-          <Text style={styles.loadingText}>Loading your trip...</Text>
+          <Text style={[styles.loadingText, { color: colors.text }]}>Loading your trip...</Text>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

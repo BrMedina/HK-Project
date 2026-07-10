@@ -19,6 +19,7 @@ import { getAllTrips, createTrip, addExpense } from "../db/queries";
 import QRScannerScreen from "../scanner/QRScannerScreen";
 import ReceiptScannerScreen from "../scanner/ReceiptScannerScreen";
 import { getCategoryColor } from "../lib/categoryColors";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 const CATEGORIES = ["Food", "Transport", "Shopping", "Activities"];
 type AmountCurrency = "HKD" | "PHP";
@@ -28,6 +29,8 @@ export default function ScanScreen() {
   const { mode, tab } = useLocalSearchParams<{ mode?: string, tab?: "qr" | "ocr" }>();
   const [activeTab, setActiveTab] = useState<"qr" | "ocr">(tab || "qr");
   const [tripId, setTripId] = useState<string | null>(null);
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
   const [loadingTrip, setLoadingTrip] = useState(true);
   const [manualEntryMode, setManualEntryMode] = useState(false);
   const [amountCurrency, setAmountCurrency] = useState<AmountCurrency>("HKD");
@@ -181,8 +184,8 @@ export default function ScanScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={["top"]}>
+      <StatusBar style={theme === "light" ? "dark" : "light"} />
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}

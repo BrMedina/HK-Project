@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Utensils, Train, ShoppingBag, Ticket } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
 import { router } from "expo-router";
 import { getCategoryColor } from "../lib/categoryColors";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 type CategoryTotals = { [category: string]: number };
 
@@ -47,7 +48,8 @@ const CATEGORIES: CategoryConfig[] = [
 ];
 
 export default function QuickOverview({ categoryTotals, totalSpent }: Props) {
-  const [activeView, setActiveView] = useState<"Circle" | "Card">("Circle");
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
 
   const getPercent = (catKey: string) => {
     if (totalSpent === 0) return 0;
@@ -62,21 +64,7 @@ export default function QuickOverview({ categoryTotals, totalSpent }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Quick Overview</Text>
-        <View style={styles.toggleContainer}>
-          <Pressable
-            style={[styles.toggleBtn, activeView === "Circle" && styles.toggleActive]}
-            onPress={() => setActiveView("Circle")}
-          >
-            <Text style={activeView === "Circle" ? styles.toggleActiveText : styles.toggleInactiveText}>Circle</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.toggleBtn, activeView === "Card" && styles.toggleActive]}
-            onPress={() => setActiveView("Card")}
-          >
-            <Text style={activeView === "Card" ? styles.toggleActiveText : styles.toggleInactiveText}>Card</Text>
-          </Pressable>
-        </View>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Overview</Text>
         <Pressable onPress={() => router.replace("/budget")}>
           <Text style={styles.seeAllText}>See All</Text>
         </Pressable>
@@ -90,44 +78,37 @@ export default function QuickOverview({ categoryTotals, totalSpent }: Props) {
 
           return (
             <View key={cat.key} style={styles.categoryItem}>
-              {activeView === "Circle" ? (
-                <View style={styles.categoryCircleContainer}>
-                  <Svg width={size} height={size} style={styles.svg}>
-                    {/* Background Circle */}
-                    <Circle
-                      cx={size / 2}
-                      cy={size / 2}
-                      r={radius}
-                      stroke="#ebedf8"
-                      strokeWidth={strokeWidth}
-                      fill="transparent"
-                    />
-                    {/* Progress Circle */}
-                    <Circle
-                      cx={size / 2}
-                      cy={size / 2}
-                      r={radius}
-                      stroke={cat.color}
-                      strokeWidth={strokeWidth}
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      fill="transparent"
-                      origin={`${size / 2}, ${size / 2}`}
-                      rotation="-90"
-                    />
-                  </Svg>
-                  <View style={styles.iconWrapper}>
-                    {cat.icon}
-                  </View>
-                </View>
-              ) : (
-                /* Card View Alternative */
-                <View style={[styles.categoryCard, { backgroundColor: `${cat.color}15` }]}>
+              <View style={styles.categoryCircleContainer}>
+                <Svg width={size} height={size} style={styles.svg}>
+                  {/* Background Circle */}
+                  <Circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke={theme === "light" ? "#ebedf8" : "#2d2d2d"}
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                  />
+                  {/* Progress Circle */}
+                  <Circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke={cat.color}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                    fill="transparent"
+                    origin={`${size / 2}, ${size / 2}`}
+                    rotation="-90"
+                  />
+                </Svg>
+                <View style={styles.iconWrapper}>
                   {cat.icon}
                 </View>
-              )}
-              <Text style={styles.categoryLabel}>{cat.label}</Text>
+              </View>
+              <Text style={[styles.categoryLabel, { color: colors.text }]}>{cat.label}</Text>
               <Text style={[styles.categoryPercent, { color: cat.color }]}>
                 {pct}%
               </Text>
@@ -152,36 +133,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#181c23",
-  },
-  toggleContainer: {
-    flexDirection: "row",
-    backgroundColor: "#ebedf8",
-    padding: 3,
-    borderRadius: 999,
-  },
-  toggleBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  toggleActive: {
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  toggleActiveText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#39baa6",
-  },
-  toggleInactiveText: {
-    fontSize: 10,
-    fontWeight: "500",
-    color: "#414754",
   },
   seeAllText: {
     fontSize: 12,
@@ -213,17 +164,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  categoryCard: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   categoryLabel: {
     fontSize: 9,
     fontWeight: "700",
-    color: "#181c23",
   },
   categoryPercent: {
     fontSize: 8,

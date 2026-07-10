@@ -2,20 +2,24 @@ import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { LayoutGrid, ClipboardList, Camera, Wallet, Coins } from "lucide-react-native";
 import { router } from "expo-router";
+import { useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 type Props = {
   activeTab?: "dashboard" | "transactions" | "budget" | "convert";
 };
 
 export default function BottomNav({ activeTab = "dashboard" }: Props) {
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
   return (
-    <View style={styles.bottomNav}>
+    <View style={[styles.bottomNav, { backgroundColor: colors.bg, borderTopColor: colors.borderBottom }]}>
       <Pressable style={styles.navItem} onPress={() => activeTab !== "dashboard" && router.replace("/dashboard")}>
         <LayoutGrid size={22} color={activeTab === "dashboard" ? "#39baa6" : "#717786"} />
         <Text
           style={[
             styles.navText,
-            activeTab === "dashboard" && { color: "#39baa6", fontWeight: "700" },
+            { color: activeTab === "dashboard" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3" },
+            activeTab === "dashboard" && { fontWeight: "700" },
           ]}
         >
           Dashboard
@@ -23,11 +27,12 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
       </Pressable>
 
       <Pressable style={styles.navItem} onPress={() => activeTab !== "transactions" && router.replace("/transactions")}>
-        <ClipboardList size={22} color={activeTab === "transactions" ? "#39baa6" : "#717786"} />
+        <ClipboardList size={22} color={activeTab === "transactions" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3"} />
         <Text
           style={[
             styles.navText,
-            activeTab === "transactions" && { color: "#39baa6", fontWeight: "700" },
+            { color: activeTab === "transactions" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3" },
+            activeTab === "transactions" && { fontWeight: "700" },
           ]}
         >
           Transactions
@@ -46,12 +51,13 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
       >
         <Wallet
           size={22}
-          color={activeTab === "budget" ? "#39baa6" : "#717786"}
+          color={activeTab === "budget" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3"}
         />
         <Text
           style={[
             styles.navText,
-            activeTab === "budget" && { color: "#39baa6", fontWeight: "700" },
+            { color: activeTab === "budget" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3" },
+            activeTab === "budget" && { fontWeight: "700" },
           ]}
         >
           Budget
@@ -59,11 +65,12 @@ export default function BottomNav({ activeTab = "dashboard" }: Props) {
       </Pressable>
 
       <Pressable style={styles.navItem} onPress={() => activeTab !== "convert" && router.replace("/convert")}>
-        <Coins size={22} color={activeTab === "convert" ? "#39baa6" : "#717786"} />
+        <Coins size={22} color={activeTab === "convert" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3"} />
         <Text
           style={[
             styles.navText,
-            activeTab === "convert" && { color: "#39baa6", fontWeight: "700" },
+            { color: activeTab === "convert" ? "#39baa6" : theme === "light" ? "#717786" : "#8b94a3" },
+            activeTab === "convert" && { fontWeight: "700" },
           ]}
         >Convert</Text>
       </Pressable>
@@ -78,9 +85,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 78,
-    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: "rgba(193, 198, 215, 0.2)",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -102,7 +107,6 @@ const styles = StyleSheet.create({
   navText: {
     fontSize: 9,
     fontWeight: "500",
-    color: "#717786",
     marginTop: 3,
   },
   scanButtonContainer: {
