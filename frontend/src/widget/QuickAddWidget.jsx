@@ -33,7 +33,7 @@ export function QuickAddWidget({
         width: "match_parent",
         backgroundColor: "#ffffff",
         borderRadius: 20,
-        padding: 14,
+        padding: 12,
         flexDirection: "column",
         justifyContent: "space-between",
       }}
@@ -171,7 +171,6 @@ export function QuickAddWidget({
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          marginTop: 12,
           width: "match_parent",
         }}
       >
@@ -182,10 +181,11 @@ export function QuickAddWidget({
             flex: 1,
             backgroundColor: "#39baa6",
             borderRadius: 10,
-            paddingVertical: 8,
+            paddingVertical: 6,
+            minHeight: 32,
             alignItems: "center",
             justifyContent: "center",
-            marginRight: 6,
+            marginRight: 4,
           }}
         >
           <TextWidget text="Scan QR Code" style={{ fontSize: 11, color: "#ffffff", fontWeight: "700" }} />
@@ -198,10 +198,11 @@ export function QuickAddWidget({
             flex: 1,
             backgroundColor: "#39baa6",
             borderRadius: 10,
-            paddingVertical: 8,
+            paddingVertical: 6,
+            minHeight: 32,
             alignItems: "center",
             justifyContent: "center",
-            marginLeft: 6,
+            marginLeft: 4,
           }}
         >
           <TextWidget text="Manual Entry" style={{ fontSize: 11, color: "#ffffff", fontWeight: "700" }} />

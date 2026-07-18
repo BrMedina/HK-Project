@@ -2,8 +2,7 @@
 import React from "react";
 import { Linking } from "react-native";
 import { QuickAddWidget } from "./QuickAddWidget";
-import { getAllTrips, getTodaySpentPHP, getTotalSpentPHP } from "../db/queries";
-import { fetchExchangeRate } from "../api/currency";
+import { getAllTrips, getTotalSpentPHP } from "../db/queries";
 
 async function getActiveTrip() {
   try {
@@ -20,15 +19,9 @@ async function loadWidgetData(activeTrip) {
     return { totalSpentPHP: 0, rate: 7.84, budgetHkd: 0 };
   }
   try {
-    const activeTripId = activeTrip.id;
-    const totalSpentPHP = await getTotalSpentPHP(activeTripId);
-    let rate = activeTrip.exchange_rate || 7.84;
-    try {
-      const result = await fetchExchangeRate("HKD", "PHP");
-      rate = result.rate;
-    } catch (_e) {
-      // Fallback to database exchange rate if offline or request fails
-    }
+    const totalSpentPHP = await getTotalSpentPHP(activeTrip.id);
+    // ponytail: use DB rate, same source as useDashboard — keeps % in sync with the app
+    const rate = activeTrip.exchange_rate || 7.84;
     return { totalSpentPHP, rate, budgetHkd: activeTrip.budget_hkd };
   } catch (error) {
     console.error("Widget loadWidgetData error:", error);
