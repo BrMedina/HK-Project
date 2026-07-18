@@ -21,7 +21,7 @@ export type Expense = {
   note: string;
   category: string;
   php_amount: number;
-  date: number | null;
+  date: number;
   source: string;
 };
 

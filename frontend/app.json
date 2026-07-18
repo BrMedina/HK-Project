@@ -58,7 +58,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#ffffff",
-          "image": "./assets/slash-icon.png"
+          "image": "./assets/splash-icon.png"
         }
       ],
       "expo-sqlite",
@@ -67,7 +67,10 @@
         {
           "cameraPermission": "Allow Gala Fund to access your camera to scan QR codes and receipts."
         }
-      ]
+      ],
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

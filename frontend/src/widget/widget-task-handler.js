@@ -43,6 +43,8 @@ export async function widgetTaskHandler(props) {
   let totalSpentPHP = 0;
   let budgetLeftPHP = 0;
   let spentPercent = 0;
+  let currencyPreference = "PHP";
+  let exchangeRate = 7.84;
 
   try {
     const activeTrip = await getActiveTrip();
@@ -50,6 +52,8 @@ export async function widgetTaskHandler(props) {
       const { todaySpentPHP: today, totalSpentPHP: total, rate, budgetHkd } = await loadWidgetData(activeTrip);
       todaySpentPHP = today || 0;
       totalSpentPHP = total || 0;
+      exchangeRate = rate;
+      currencyPreference = activeTrip.currency_preference || "PHP";
       totalBudgetPHP = (budgetHkd || 0) * rate;
       budgetLeftPHP = Math.max(0, totalBudgetPHP - totalSpentPHP);
       spentPercent = totalBudgetPHP > 0 ? Math.min(Math.round((totalSpentPHP / totalBudgetPHP) * 100), 100) : 0;
@@ -69,6 +73,8 @@ export async function widgetTaskHandler(props) {
             totalSpentPHP={totalSpentPHP}
             budgetLeftPHP={budgetLeftPHP}
             spentPercent={spentPercent}
+            currencyPreference={currencyPreference}
+            exchangeRate={exchangeRate}
           />
         );
         break;

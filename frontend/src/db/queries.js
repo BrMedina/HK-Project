@@ -22,6 +22,18 @@ export async function getAllTrips() {
   return withDB((db) => db.getAllAsync("SELECT * FROM trips ORDER BY created_at DESC"));
 }
 
+function triggerWidgetUpdate() {
+  try {
+    const { Platform } = require("react-native");
+    if (Platform.OS === "android") {
+      const { updateAppWidget } = require("../widget/updateWidget");
+      updateAppWidget().catch((err) => console.error("Widget update error:", err));
+    }
+  } catch (e) {
+    // Fail silently in non-react-native environments
+  }
+}
+
 export async function createTrip(name, budgetHkd, exchangeRate) {
   const id = genId();
   const now = Date.now();
@@ -29,6 +41,7 @@ export async function createTrip(name, budgetHkd, exchangeRate) {
     "INSERT INTO trips (id, name, budget_hkd, exchange_rate, created_at, duration_days, currency_preference) VALUES (?, ?, ?, ?, ?, ?, ?)",
     [id, name, budgetHkd, exchangeRate, now, 7, "PHP"]
   ));
+  triggerWidgetUpdate();
   return { id, name, budget_hkd: budgetHkd, exchange_rate: exchangeRate, created_at: now, duration_days: 7, currency_preference: "PHP" };
 }
 
@@ -40,6 +53,7 @@ export async function addExpense(tripId, { phpAmount, category, note, transactio
     "INSERT INTO expenses (id, trip_id, php_amount, category, note, date, source, image_uri, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [id, tripId, phpAmount, category, note ?? "", date, source, imageUri, now]
   ));
+  triggerWidgetUpdate();
   return { id, tripId, phpAmount, category, note, transactionDate: date, source, imageUri, createdAt: now };
 }
 
@@ -83,10 +97,12 @@ export async function getTotalsByCategory(tripId) {
 
 export async function deleteExpense(expenseId) {
   await withDB((db) => db.runAsync("DELETE FROM expenses WHERE id = ?", [expenseId]));
+  triggerWidgetUpdate();
 }
 
 export async function deleteAllExpensesForTrip(tripId) {
   await withDB((db) => db.runAsync("DELETE FROM expenses WHERE trip_id = ?", [tripId]));
+  triggerWidgetUpdate();
 }
 
 export async function updateTripPreferences(tripId, durationDays, currencyPreference, budgetHkd) {
@@ -94,6 +110,7 @@ export async function updateTripPreferences(tripId, durationDays, currencyPrefer
     "UPDATE trips SET duration_days = ?, currency_preference = ?, budget_hkd = ? WHERE id = ?",
     [durationDays, currencyPreference, budgetHkd, tripId]
   ));
+  triggerWidgetUpdate();
 }
 
 export async function updateTripExchangeRate(tripId, exchangeRate) {
@@ -101,4 +118,5 @@ export async function updateTripExchangeRate(tripId, exchangeRate) {
     "UPDATE trips SET exchange_rate = ? WHERE id = ?",
     [exchangeRate, tripId]
   ));
+  triggerWidgetUpdate();
 }
