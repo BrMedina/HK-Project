@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Alert } from "react-native";
 import { getAllTrips, updateTripExchangeRate } from "./queries";
 import { fetchExchangeRate } from "../api/currency";
@@ -55,6 +55,8 @@ const sanitize = (t: string) => t.replace(/[^0-9.]/g, "");
 
 export function useConverter() {
   const [trip, setTrip] = useState<Trip | null>(null);
+  const refreshingRef = useRef(false);
+  const savingRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [rate, setRate] = useState(7.84);
   const [rateHistory, setRateHistory] = useState<RateEntry[]>([]);
@@ -122,13 +124,14 @@ export function useConverter() {
 
   // ---- Save custom rate ----
   const handleSaveRate = async () => {
-    if (!trip) return;
+    if (!trip || savingRef.current) return;
     const parsed = parseFloat(customRateInput);
     if (isNaN(parsed) || parsed <= 0) {
       Alert.alert("Invalid rate", "Please enter a positive number.");
       return;
     }
     try {
+      savingRef.current = true;
       setSaving(true);
       await updateTripExchangeRate(trip.id, parsed);
       setRate(parsed);
@@ -142,12 +145,14 @@ export function useConverter() {
       Alert.alert("Error", "Could not save rate.");
     } finally {
       setSaving(false);
+      savingRef.current = false;
     }
   };
 
   const handleRefreshRate = async () => {
-    if (!trip) return;
+    if (!trip || refreshingRef.current) return;
     try {
+      refreshingRef.current = true;
       setRefreshing(true);
       const result = await fetchExchangeRate("HKD", "PHP", true);
       setRate(result.rate);
@@ -163,6 +168,7 @@ export function useConverter() {
       Alert.alert("Error", "Could not refresh live rate.");
     } finally {
       setRefreshing(false);
+      refreshingRef.current = false;
     }
   };
 

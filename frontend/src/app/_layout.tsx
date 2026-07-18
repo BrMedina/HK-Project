@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BackHandler, Platform } from "react-native";
 import { Stack, usePathname, useRouter } from "expo-router";
 import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
-import { ThemeProvider } from "../lib/ThemeContext";
+import { ThemeProvider, useTheme, lightColors, darkColors } from "../lib/ThemeContext";
 
 function NavigationWrapper() {
   const pathname = usePathname();
@@ -36,7 +36,18 @@ function NavigationWrapper() {
     }
   }, [hasShareIntent, pathname]);
 
-  return <Stack />;
+  const { theme } = useTheme();
+  const colors = theme === "light" ? lightColors : darkColors;
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "none",
+        contentStyle: { backgroundColor: colors.bg },
+      }}
+    />
+  );
 }
 
 export default function RootLayout() {
