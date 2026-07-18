@@ -63,7 +63,7 @@ export default function ShareReceiveScreen() {
     runOcr(shareIntent.files[0].path);
   }, [hasShareIntent, shareIntent]);
 
-  const runOcr = async (imageUri) => {
+  async function runOcr(imageUri) {
     setLoading(true);
     setError("");
     try {
@@ -89,7 +89,7 @@ export default function ShareReceiveScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const getConvertedAmount = (value, from) => {
     const parsedValue = parseFloat(value?.toString().replace(/,/g, ""));

@@ -65,7 +65,7 @@ export default function TransactionItem({
 
   return (
     <>
-      <View style={[styles.transactionItem, isLast && styles.transactionItemLast]}>
+      <View style={[styles.transactionItem, isLast && styles.transactionItemLast, { borderBottomColor: theme === "light" ? "rgba(100, 110, 108, 0.15)" : "rgba(255, 255, 255, 0.1)" }]}>
         <Pressable onPress={() => setModalVisible(true)} style={styles.transMainPressable}>
           <View style={styles.transLeft}>
             <View style={[styles.iconContainer, { backgroundColor: bg }, imageUri && { borderRadius: 8, overflow: "hidden" }]}>
@@ -76,17 +76,17 @@ export default function TransactionItem({
               )}
             </View>
             <View style={styles.details}>
-              <Text style={[styles.transTitle, { color: "#fff" }]} numberOfLines={1}>
+              <Text style={[styles.transTitle, { color: colors.text }]} numberOfLines={1}>
                 {expense.note || expense.category}
               </Text>
-              <Text style={[styles.transSub, { color: "rgba(255, 255, 255, 0.7)" }]}>
+              <Text style={[styles.transSub, { color: theme === "light" ? "#717786" : "#8b94a3" }]}>
                 {showTimeOnly
                   ? `${expense.category} • ${formatTime(expense.date)}`
                   : `${formatDate(expense.date)} • ${expense.category}`}
               </Text>
             </View>
           </View>
-          <Text style={[styles.transAmount, { color: "#fff" }]}>
+          <Text style={[styles.transAmount, { color: colors.text }]}>
             -{currency === "HKD" ? "HKD" : "PHP"} {displayAmount.toLocaleString(currency === "HKD" ? "en-US" : "en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </Text>
         </Pressable>
