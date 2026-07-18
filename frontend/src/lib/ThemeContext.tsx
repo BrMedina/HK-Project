@@ -29,7 +29,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem("theme", newTheme);
   };
 
-  if (!loaded) return <>{children}</>;
+  if (!loaded) return null;
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
