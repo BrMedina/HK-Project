@@ -43,9 +43,9 @@
             {
               "name": "QuickAdd",
               "label": "Gala Fund — Quick Add",
-              "minWidth": "220dp",
+              "minWidth": "290dp",
               "minHeight": "110dp",
-              "targetCellWidth": 3,
+              "targetCellWidth": 4,
               "targetCellHeight": 2,
               "description": "See today's spend and log an expense in one tap.",
               "updatePeriodMillis": 1800000

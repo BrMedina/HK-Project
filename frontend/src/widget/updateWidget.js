@@ -14,7 +14,6 @@ export async function updateAppWidget() {
     if (trips.length === 0) return;
 
     const activeTrip = trips[0];
-    const todaySpentPHP = await getTodaySpentPHP(activeTrip.id);
     const totalSpentPHP = await getTotalSpentPHP(activeTrip.id);
     const rate = activeTrip.exchange_rate || 7.84;
     const currencyPreference = activeTrip.currency_preference || "PHP";

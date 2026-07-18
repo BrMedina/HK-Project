@@ -17,29 +17,27 @@ async function getActiveTrip() {
 
 async function loadWidgetData(activeTrip) {
   if (!activeTrip) {
-    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: 7.84, budgetHkd: 0 };
+    return { totalSpentPHP: 0, rate: 7.84, budgetHkd: 0 };
   }
   try {
     const activeTripId = activeTrip.id;
-    const todaySpentPHP = await getTodaySpentPHP(activeTripId);
     const totalSpentPHP = await getTotalSpentPHP(activeTripId);
     let rate = activeTrip.exchange_rate || 7.84;
     try {
       const result = await fetchExchangeRate("HKD", "PHP");
       rate = result.rate;
-    } catch (e) {
+    } catch (_e) {
       // Fallback to database exchange rate if offline or request fails
     }
-    return { todaySpentPHP, totalSpentPHP, rate, budgetHkd: activeTrip.budget_hkd };
-  } catch (e) {
-    console.error("Widget loadWidgetData error:", e);
-    return { todaySpentPHP: 0, totalSpentPHP: 0, rate: activeTrip.exchange_rate || 7.84, budgetHkd: activeTrip.budget_hkd };
+    return { totalSpentPHP, rate, budgetHkd: activeTrip.budget_hkd };
+  } catch (error) {
+    console.error("Widget loadWidgetData error:", error);
+    return { totalSpentPHP: 0, rate: activeTrip.exchange_rate || 7.84, budgetHkd: activeTrip.budget_hkd };
   }
 }
 
 export async function widgetTaskHandler(props) {
   let totalBudgetPHP = 0;
-  let todaySpentPHP = 0;
   let totalSpentPHP = 0;
   let budgetLeftPHP = 0;
   let spentPercent = 0;
@@ -49,8 +47,7 @@ export async function widgetTaskHandler(props) {
   try {
     const activeTrip = await getActiveTrip();
     if (activeTrip) {
-      const { todaySpentPHP: today, totalSpentPHP: total, rate, budgetHkd } = await loadWidgetData(activeTrip);
-      todaySpentPHP = today || 0;
+      const { totalSpentPHP: total, rate, budgetHkd } = await loadWidgetData(activeTrip);
       totalSpentPHP = total || 0;
       exchangeRate = rate;
       currencyPreference = activeTrip.currency_preference || "PHP";
